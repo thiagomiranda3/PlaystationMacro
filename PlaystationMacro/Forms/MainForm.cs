@@ -66,8 +66,8 @@ namespace PlaystationMacro.Forms
 
             // Create macro player
             m_MacroPlayer = new MacroPlayer();
-            m_MacroPlayer.Loop = true;
-            m_MacroPlayer.PropertyChanged += MacroPlayer_PropertyChanged;
+            m_MacroPlayer.Loop(true);
+            //m_MacroPlayer.PropertyChanged += MacroPlayer_PropertyChanged;
 
             // Set control mode
             SetControlMode(ControlMode.Macro);
@@ -130,7 +130,7 @@ namespace PlaystationMacro.Forms
                 recordButton.Enabled = true;
                 recordToolStripMenuItem.Enabled = true;
                 loopCheckBox.Enabled = true;
-                loopCheckBox.Checked = m_MacroPlayer.Loop;
+                loopCheckBox.Checked = m_MacroPlayer.IsLooping;
                 loopToolStripMenuItem.Enabled = true;
                 scriptButton.Enabled = false;
                 saveToolStripMenuItem.Enabled = true;
@@ -256,8 +256,8 @@ namespace PlaystationMacro.Forms
 
                 case "Loop":
                     {
-                        loopCheckBox.Checked = m_MacroPlayer.Loop;
-                        loopToolStripMenuItem.Checked = m_MacroPlayer.Loop;
+                        loopCheckBox.Checked = m_MacroPlayer.IsLooping;
+                        loopToolStripMenuItem.Checked = m_MacroPlayer.IsLooping;
                         break;
                     }
             }
@@ -362,7 +362,7 @@ namespace PlaystationMacro.Forms
         {
             if (m_ControlMode == ControlMode.Macro)
             {
-                m_MacroPlayer.Loop = loopCheckBox.Checked;
+                m_MacroPlayer.Loop(loopCheckBox.Checked);
             }
         }
         #endregion
@@ -454,7 +454,7 @@ namespace PlaystationMacro.Forms
         {
             if (m_ControlMode == ControlMode.Macro)
             {
-                m_MacroPlayer.Loop = !loopToolStripMenuItem.Checked;
+                m_MacroPlayer.Loop(!loopToolStripMenuItem.Checked);
             }
         }
         #endregion

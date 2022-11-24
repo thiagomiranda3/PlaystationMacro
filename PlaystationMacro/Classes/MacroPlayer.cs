@@ -31,128 +31,16 @@ using System.Text;
 
 namespace PlaystationMacro.Classes
 {
-    public delegate void MacroLapEnterHandler(object sender);
-
-    public class MacroPlayer : INotifyPropertyChanged
+    public class MacroPlayer
     {
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
+        public bool IsPlaying { get; private set; }
+        public bool IsPaused { get; private set; }
+        public bool IsRecording { get; private set; }
+        public bool IsLooping { get; private set; }
+        public int CurrentTick { get; private set; }
 
-        #region Properties
-        private bool m_Loop = false;
-        public bool Loop
-        {
-            get { return m_Loop; }
-            set
-            {
-                if (value != m_Loop)
-                {
-                    m_Loop = value;
-                    NotifyPropertyChanged("Loop");
-                }
-            }
-        }
-
-        private bool m_RecordShortcut = false;
-        public bool RecordShortcut
-        {
-            get { return m_RecordShortcut; }
-            set
-            {
-                if (value != m_RecordShortcut)
-                {
-                    m_RecordShortcut = value;
-                    NotifyPropertyChanged("RecordShortcut");
-                }
-            }
-        }
-
-        private bool m_IsPlaying = false;
-        public bool IsPlaying
-        {
-            get { return m_IsPlaying; }
-            private set
-            {
-                if (value != m_IsPlaying)
-                {
-                    m_IsPlaying = value;
-                    NotifyPropertyChanged("IsPlaying");
-                }
-            }
-        }
-
-        private bool m_IsPaused = false;
-        public bool IsPaused
-        {
-            get { return m_IsPaused; }
-            private set
-            {
-                if (value != m_IsPaused)
-                {
-                    m_IsPaused = value;
-                    NotifyPropertyChanged("IsPaused");
-                }
-            }
-        }
-
-        private bool m_IsRecording = false;
-        public bool IsRecording
-        {
-            get { return m_IsRecording; }
-            private set
-            {
-                if (value != m_IsRecording)
-                {
-                    m_IsRecording = value;
-                    NotifyPropertyChanged("IsRecording");
-                }
-            }
-        }
-
-        private int m_CurrentTick = 0;
-        public int CurrentTick
-        {
-            get { return m_CurrentTick; }
-            private set
-            {
-                if (value != m_CurrentTick)
-                {
-                    m_CurrentTick = value;
-                    NotifyPropertyChanged("CurrentTick");
-                }
-            }
-        }
-
-        private List<byte[]> m_Sequence = new List<byte[]>();
-        public List<byte[]> Sequence
-        {
-            get { return m_Sequence; }
-            set
-            {
-                if (value != m_Sequence)
-                {
-                    m_Sequence = value;
-                    NotifyPropertyChanged("Sequence");
-                }
-            }
-        }
-        #endregion
-
-        #region Events
-        public event MacroLapEnterHandler LapEnter;
-        #endregion
-
-        private bool m_RecordShortcutDown = false;
-
-        /* Constructor */
         public MacroPlayer()
         {
-            Loop = false;
             IsPlaying = false;
             IsPaused = false;
             IsRecording = false;
@@ -160,6 +48,11 @@ namespace PlaystationMacro.Classes
             Sequence = new List<byte[]>();
         }
 
+        #region Properties
+        public void Loop(bool loop)
+        {
+            IsLooping = loop;
+        }
 
         public void Play()
         {
@@ -173,6 +66,11 @@ namespace PlaystationMacro.Classes
             IsPaused = true;
         }
 
+        public void Record()
+        {
+            IsRecording = !IsRecording;
+        }
+
         public void Stop()
         {
             IsPlaying = false;
@@ -180,16 +78,25 @@ namespace PlaystationMacro.Classes
             CurrentTick = 0;
         }
 
-        public void Record()
-        {
-            IsRecording = !IsRecording;
-        }
-
         public void Clear()
         {
             Sequence = new List<byte[]>();
             CurrentTick = 0;
         }
+
+        private List<byte[]> m_Sequence = new List<byte[]>();
+        public List<byte[]> Sequence
+        {
+            get { return m_Sequence; }
+            set
+            {
+                if (value != m_Sequence)
+                {
+                    m_Sequence = value;
+                }
+            }
+        }
+        #endregion
 
         public void LoadFile(string path)
         {
@@ -231,11 +138,8 @@ namespace PlaystationMacro.Classes
                 {
                     CurrentTick = 0;
 
-                    // Raise LapEnter event
-                    LapEnter?.Invoke(this);
-
                     // Stop if looping is disabled
-                    if (!Loop && !IsRecording)
+                    if (!IsLooping && !IsRecording)
                     {
                         Stop();
                     }
