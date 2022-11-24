@@ -1,4 +1,6 @@
-# PS4 Macro
+# Playstation Macro
+
+This project is a fork of the awesome [PS4Macro](https://github.com/komefai/PS4Macro), forked to work for PS5 too, along with all the new control sensors and buttons
 
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/fold_left.svg?style=social&label=Follow%20Me)](https://twitter.com/itskomefai)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](http://paypal.me/Komefai)
