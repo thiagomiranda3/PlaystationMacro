@@ -24,7 +24,6 @@
 
 using PlaystationMacro.Classes;
 using PlaystationMacro.Classes.GlobalHooks;
-using PlaystationMacro.Classes.Remapping;
 using PS4RemotePlayInterceptor;
 using System;
 using System.Collections.Generic;
@@ -43,7 +42,6 @@ namespace PlaystationMacro.Forms
     {
         Macro,
         Script,
-        Remapper,
         StatusChecker
     }
 
@@ -55,7 +53,6 @@ namespace PlaystationMacro.Forms
         private GlobalMouseHook m_GlobalMouseHook;
 
         private MacroPlayer m_MacroPlayer;
-        private Remapper m_Remapper;
         private StatusChecker m_StatusChecker;
 
         private ControlMode m_ControlMode;
@@ -85,9 +82,6 @@ namespace PlaystationMacro.Forms
             m_MacroPlayer.Loop = true;
             m_MacroPlayer.RecordShortcut = true;
             m_MacroPlayer.PropertyChanged += MacroPlayer_PropertyChanged;
-
-            // Create remapper
-            m_Remapper = new Remapper();
 
             // Create status checker
             m_StatusChecker = new StatusChecker();
@@ -186,12 +180,10 @@ namespace PlaystationMacro.Forms
                 loopCheckBox.Enabled = true;
                 loopCheckBox.Checked = m_MacroPlayer.Loop;
                 loopToolStripMenuItem.Enabled = true;
-                recordOnTouchToolStripMenuItem.Enabled = true;
                 scriptButton.Enabled = false;
                 saveToolStripMenuItem.Enabled = true;
                 saveAsToolStripMenuItem.Enabled = true;
                 clearMacroToolStripMenuItem.Enabled = true;
-                trimMacroToolStripMenuItem.Enabled = true;
             }
             else if (m_ControlMode == ControlMode.Script)
             {
@@ -207,25 +199,11 @@ namespace PlaystationMacro.Forms
                 loopCheckBox.Enabled = false;
                 loopCheckBox.Checked = false;
                 loopToolStripMenuItem.Enabled = false;
-                recordOnTouchToolStripMenuItem.Enabled = false;
                 scriptButton.Enabled = true;
                 saveToolStripMenuItem.Enabled = false;
                 saveAsToolStripMenuItem.Enabled = false;
                 clearMacroToolStripMenuItem.Enabled = false;
-                trimMacroToolStripMenuItem.Enabled = false;
                 currentTickToolStripStatusLabel.Text = CURRENT_TICK_DEFAULT_TEXT;
-            }
-            else if (m_ControlMode == ControlMode.Remapper)
-            {
-                // Stop macro player
-                if (m_MacroPlayer.IsRecording) m_MacroPlayer.Record();
-                m_MacroPlayer.Stop();
-
-                // Stop script
-                if (m_ScriptHost != null && m_ScriptHost.IsRunning) m_ScriptHost.Stop();
-
-                // Setup callback to interceptor
-                Interceptor.Callback = new InterceptionDelegate(m_Remapper.OnReceiveData);
             }
             else if (m_ControlMode == ControlMode.StatusChecker)
             {
@@ -256,7 +234,6 @@ namespace PlaystationMacro.Forms
 
         private void ForwardRemotePlayProcess()
         {
-            m_Remapper.RemotePlayProcess = m_RemotePlayProcess;
             m_StatusChecker.RemotePlayProcess = m_RemotePlayProcess;
         }
 
@@ -279,11 +256,7 @@ namespace PlaystationMacro.Forms
 
         private void OnKeyPressed(object sender, GlobalKeyboardHookEventArgs e)
         {
-            if (m_ControlMode == ControlMode.Remapper)
-            {
-                m_Remapper.OnKeyPressed(sender, e);
-            }
-            else if (m_ControlMode == ControlMode.StatusChecker)
+            if (m_ControlMode == ControlMode.StatusChecker)
             {
                 m_StatusChecker.OnKeyPressed(sender, e);
             }
@@ -291,11 +264,7 @@ namespace PlaystationMacro.Forms
 
         private void OnMouseEvent(object sender, GlobalMouseHookEventArgs e)
         {
-            if (m_ControlMode == ControlMode.Remapper)
-            {
-                m_Remapper.OnMouseEvent(sender, e);
-            }
-            else if (m_ControlMode == ControlMode.StatusChecker)
+            if (m_ControlMode == ControlMode.StatusChecker)
             {
                 m_StatusChecker.OnMouseEvent(sender, e);
             }
@@ -370,12 +339,6 @@ namespace PlaystationMacro.Forms
                     {
                         loopCheckBox.Checked = m_MacroPlayer.Loop;
                         loopToolStripMenuItem.Checked = m_MacroPlayer.Loop;
-                        break;
-                    }
-
-                case "RecordShortcut":
-                    {
-                        recordOnTouchToolStripMenuItem.Checked = m_MacroPlayer.RecordShortcut;
                         break;
                     }
             }
@@ -533,22 +496,6 @@ namespace PlaystationMacro.Forms
                 m_MacroPlayer.Clear();
             }
         }
-
-        private void trimMacroToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            m_MacroPlayer.Stop();
-
-            var oldSequenceLength = m_MacroPlayer.Sequence.Count;
-            m_MacroPlayer.Sequence = MacroUtility.TrimMacro(m_MacroPlayer.Sequence);
-
-            // Show results
-            var difference = oldSequenceLength - m_MacroPlayer.Sequence.Count;
-            MessageBox.Show(
-                $"{difference} frames removed" + "\n\n" + 
-                $"Before: {oldSequenceLength} frames" + "\n" +
-                $"After: {m_MacroPlayer.Sequence.Count} frames", "Trim Macro", 
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
         #endregion
 
         #region Playback
@@ -591,61 +538,6 @@ namespace PlaystationMacro.Forms
                 m_MacroPlayer.Loop = !loopToolStripMenuItem.Checked;
             }
         }
-
-        private void recordOnTouchToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.RecordShortcut = !recordOnTouchToolStripMenuItem.Checked;
-            }
-        }
-        #endregion
-
-        #region Tools
-        private void screenshotToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var backgroundMode = !(ModifierKeys == Keys.Shift);
-            var frame = PlaystationMacroAPI.Internal.ScriptUtility.CaptureFrame(backgroundMode);
-            var folder = "screenshots";
-
-            // Create folder if not exist
-            Directory.CreateDirectory(folder);
-
-            if (frame != null)
-            {
-                var fileName = folder + @"\" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png";
-                frame.Save(fileName);
-
-                Console.WriteLine($"{DateTime.Now.ToString()} - Screenshot saved to {Path.GetFullPath(fileName)}");
-            }
-            else
-            {
-                MessageBox.Show("Unable to capture screenshot!");
-            }
-        }
-
-        private void imageHashToolToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            new ImageHashForm().Show(this);
-        }
-
-        private void resizeRemotePlayToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            new ResizeRemotePlayForm().ShowDialog(this);
-        }
-
-        private void macroCompressorToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            new MacroCompressorForm().ShowDialog(this);
-        }
-
-        private void remapperToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TemporarilySetControlMode(ControlMode.Remapper, () =>
-            {
-                new RemapperForm(m_Remapper).ShowDialog(this);
-            });
-        }
         #endregion
 
         #region Help
@@ -665,11 +557,6 @@ namespace PlaystationMacro.Forms
             aboutForm.ShowDialog(this);
         }
         #endregion
-
-        #endregion
-
-        /* Status strip methods */
-        #region Status Strip
 
         #endregion
     }

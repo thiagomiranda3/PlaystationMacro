@@ -64,14 +64,6 @@
     <Compile Include="Classes\ConsoleHelper.cs" />
     <Compile Include="Classes\GlobalHooks\GlobalKeyboardHook.cs" />
     <Compile Include="Classes\GlobalHooks\GlobalMouseHook.cs" />
-    <Compile Include="Classes\MacroUtility.cs" />
-    <Compile Include="Classes\Remapping\BaseAction.cs" />
-    <Compile Include="Classes\Remapping\BindingsContainer.cs" />
-    <Compile Include="Classes\Remapping\MouseStroke.cs" />
-    <Compile Include="Classes\Remapping\Remapper.cs" />
-    <Compile Include="Classes\Remapping\MacroAction.cs" />
-    <Compile Include="Classes\Remapping\MappingAction.cs" />
-    <Compile Include="Classes\Remapping\RemapperUtility.cs" />
     <Compile Include="Classes\ScriptHost.cs" />
     <Compile Include="Classes\ScriptHostUtility.cs" />
     <Compile Include="Classes\Settings.cs" />
@@ -86,35 +78,11 @@
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\MacroPlayer.cs" />
-    <Compile Include="Forms\ImageHashForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ImageHashForm.Designer.cs">
-      <DependentUpon>ImageHashForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MacroCompressorForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MacroCompressorForm.Designer.cs">
-      <DependentUpon>MacroCompressorForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\RemapperForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\RemapperForm.Designer.cs">
-      <DependentUpon>RemapperForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\ResizeRemotePlayForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ResizeRemotePlayForm.Designer.cs">
-      <DependentUpon>ResizeRemotePlayForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\StatusCheckerForm.cs">
       <SubType>Form</SubType>
@@ -128,20 +96,8 @@
     <EmbeddedResource Include="Forms\AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ImageHashForm.resx">
-      <DependentUpon>ImageHashForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MacroCompressorForm.resx">
-      <DependentUpon>MacroCompressorForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\RemapperForm.resx">
-      <DependentUpon>RemapperForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ResizeRemotePlayForm.resx">
-      <DependentUpon>ResizeRemotePlayForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\StatusCheckerForm.resx">
       <DependentUpon>StatusCheckerForm.cs</DependentUpon>

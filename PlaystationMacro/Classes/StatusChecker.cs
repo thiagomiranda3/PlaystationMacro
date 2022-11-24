@@ -23,7 +23,6 @@
 // THE SOFTWARE.
 
 using PlaystationMacro.Classes.GlobalHooks;
-using PlaystationMacro.Classes.Remapping;
 using PS4RemotePlayInterceptor;
 using System;
 using System.Collections.Generic;
@@ -115,13 +114,6 @@ namespace PlaystationMacro.Classes
                     MainWindowHandle = mainWindowHandle;
                     OnStatusChanged?.Invoke();
                 }
-            }
-
-            var foregroundWindowHandle = RemapperUtility.GetForegroundWindow();
-            if (foregroundWindowHandle != ForegroundWindowHandle)
-            {
-                ForegroundWindowHandle = foregroundWindowHandle;
-                OnStatusChanged?.Invoke();
             }
 
             // Status
