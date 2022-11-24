@@ -77,7 +77,7 @@ namespace PlaystationMacroAPI
         /// </summary>
         /// <param name="sequence"></param>
         /// <param name="suspendDelay"></param>
-        void PlayMacro(List<DualShockState> sequence, int suspendDelay = 0);
+        void PlayMacro(List<byte[]> sequence, int suspendDelay = 0);
 
         /// <summary>
         /// Play a macro from path

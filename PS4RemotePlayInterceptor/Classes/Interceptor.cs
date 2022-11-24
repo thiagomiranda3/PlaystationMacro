@@ -36,7 +36,7 @@ using System.Text;
 
 namespace PS4RemotePlayInterceptor
 {
-    public delegate void InterceptionDelegate(ref DualShockState state);
+    public delegate void InterceptionDelegate(ref byte[] state);
 
     public enum InjectionMode
     {

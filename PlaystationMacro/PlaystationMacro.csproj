@@ -44,10 +44,6 @@
       <HintPath>..\packages\Mono.Options.5.3.0.1\lib\net4-client\Mono.Options.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PS4RemotePlayInterceptor, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PS4RemotePlayInterceptor.0.5.2\lib\net40\PS4RemotePlayInterceptor.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Remoting" />
@@ -151,6 +147,10 @@
     <ProjectReference Include="..\PlaystationMacroAPI\PlaystationMacroAPI.csproj">
       <Project>{63b26590-8dd4-4534-8e5e-c72750f29934}</Project>
       <Name>PlaystationMacroAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PS4RemotePlayInterceptor\PS4RemotePlayInterceptor.csproj">
+      <Project>{7ea5cd79-4454-4be5-bb06-fa4c8122808a}</Project>
+      <Name>PS4RemotePlayInterceptor</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

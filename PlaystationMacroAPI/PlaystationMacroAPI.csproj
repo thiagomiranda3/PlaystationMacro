@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="Bridge\ScriptConfig.cs" />
     <Compile Include="Internal\BackgroundCapture.cs" />
-    <Compile Include="Bridge\DualShockState.cs" />
     <Compile Include="Internal\ForegroundCapture.cs" />
     <Compile Include="Bridge\IScriptHost.cs" />
     <Compile Include="Internal\ImageHashing.cs" />

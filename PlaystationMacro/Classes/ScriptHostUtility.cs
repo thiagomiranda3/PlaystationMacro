@@ -33,21 +33,21 @@ namespace PlaystationMacro.Classes
 {
     class ScriptHostUtility
     {
-        public static PS4RemotePlayInterceptor.DualShockState ConvertAPIToInterceptorState(PlaystationMacroAPI.DualShockState state)
+        public static byte[] ConvertAPIToInterceptorState(byte[] state)
         {
             var serialized = SerializeAPIState(state);
             return DeserializeInterceptorState(serialized);
         }
 
-        public static PlaystationMacroAPI.DualShockState ConvertInterceptorToAPIState(PS4RemotePlayInterceptor.DualShockState state)
+        public static byte[] ConvertInterceptorToAPIState(byte[] state)
         {
             var serialized = SerializeInterceptorState(state);
             return DeserializeAPIState(serialized);
         }
 
-        public static string SerializeAPIState(PlaystationMacroAPI.DualShockState state)
+        public static string SerializeAPIState(byte[] state)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(PlaystationMacroAPI.DualShockState));
+            XmlSerializer serializer = new XmlSerializer(typeof(byte[]));
             var sb = new StringBuilder();
 
             using (StringWriter writer = new StringWriter(sb))
@@ -57,17 +57,17 @@ namespace PlaystationMacro.Classes
             }
         }
 
-        public static PlaystationMacroAPI.DualShockState DeserializeAPIState(string data)
+        public static byte[] DeserializeAPIState(string data)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(PlaystationMacroAPI.DualShockState));
+            XmlSerializer deserializer = new XmlSerializer(typeof(byte[]));
             using (StringReader reader = new StringReader(data))
             {
                 object obj = deserializer.Deserialize(reader);
-                return obj as PlaystationMacroAPI.DualShockState;
+                return obj as byte[];
             }
         }
 
-        public static string SerializeInterceptorState(PS4RemotePlayInterceptor.DualShockState state)
+        public static string SerializeInterceptorState(byte[] state)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(PS4RemotePlayInterceptor.DualShockState));
             var sb = new StringBuilder();
@@ -79,32 +79,32 @@ namespace PlaystationMacro.Classes
             }
         }
 
-        public static PS4RemotePlayInterceptor.DualShockState DeserializeInterceptorState(string data)
+        public static byte[] DeserializeInterceptorState(string data)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(PS4RemotePlayInterceptor.DualShockState));
+            XmlSerializer deserializer = new XmlSerializer(typeof(byte[]));
             using (StringReader reader = new StringReader(data))
             {
                 object obj = deserializer.Deserialize(reader);
-                return obj as PS4RemotePlayInterceptor.DualShockState;
+                return obj as byte[];
             }
         }
 
         #region Sequence
-        public static List<PS4RemotePlayInterceptor.DualShockState> ConvertAPIToInterceptorSequence(List<PlaystationMacroAPI.DualShockState> sequence)
+        public static List<byte[]> ConvertAPIToInterceptorSequence(List<byte[]> sequence)
         {
             var serialized = SerializeAPISequence(sequence);
             return DeserializeInterceptorSequence(serialized);
         }
 
-        public static List<PlaystationMacroAPI.DualShockState> ConvertInterceptorToAPISequence(List<PS4RemotePlayInterceptor.DualShockState> sequence)
+        public static List<byte[]> ConvertInterceptorToAPISequence(List<byte[]> sequence)
         {
             var serialized = SerializeInterceptorSequence(sequence);
             return DeserializeAPISequence(serialized);
         }
 
-        public static string SerializeAPISequence(List<PlaystationMacroAPI.DualShockState> sequence)
+        public static string SerializeAPISequence(List<byte[]> sequence)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(List<PlaystationMacroAPI.DualShockState>));
+            XmlSerializer serializer = new XmlSerializer(typeof(List<byte[]>));
             var sb = new StringBuilder();
 
             using (StringWriter writer = new StringWriter(sb))
@@ -114,17 +114,17 @@ namespace PlaystationMacro.Classes
             }
         }
 
-        public static List<PlaystationMacroAPI.DualShockState> DeserializeAPISequence(string data)
+        public static List<byte[]> DeserializeAPISequence(string data)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(List<PlaystationMacroAPI.DualShockState>));
+            XmlSerializer deserializer = new XmlSerializer(typeof(List<byte[]>));
             using (StringReader reader = new StringReader(data))
             {
                 object obj = deserializer.Deserialize(reader);
-                return obj as List<PlaystationMacroAPI.DualShockState>;
+                return obj as List<byte[]>;
             }
         }
 
-        public static string SerializeInterceptorSequence(List<PS4RemotePlayInterceptor.DualShockState> sequence)
+        public static string SerializeInterceptorSequence(List<byte[]> sequence)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(List<PS4RemotePlayInterceptor.DualShockState>));
             var sb = new StringBuilder();
@@ -136,13 +136,13 @@ namespace PlaystationMacro.Classes
             }
         }
 
-        public static List<PS4RemotePlayInterceptor.DualShockState> DeserializeInterceptorSequence(string data)
+        public static List<byte[]> DeserializeInterceptorSequence(string data)
         {
-            XmlSerializer deserializer = new XmlSerializer(typeof(List<PS4RemotePlayInterceptor.DualShockState>));
+            XmlSerializer deserializer = new XmlSerializer(typeof(List<byte[]>));
             using (StringReader reader = new StringReader(data))
             {
                 object obj = deserializer.Deserialize(reader);
-                return obj as List<PS4RemotePlayInterceptor.DualShockState>;
+                return obj as List<byte[]>;
             }
         }
         #endregion

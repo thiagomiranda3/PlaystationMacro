@@ -132,7 +132,7 @@ namespace PlaystationMacro.Classes
             SuspendCounter = delay;
         }
 
-        public void PlayMacro(List<DualShockState> sequence, int suspendDelay = 0)
+        public void PlayMacro(List<byte[]> sequence, int suspendDelay = 0)
         {
             MacroPlayer.Sequence = ScriptHostUtility.ConvertAPIToInterceptorSequence(sequence);
             MacroPlayer.Play();
@@ -244,7 +244,7 @@ namespace PlaystationMacro.Classes
             Script.OnStopped();
         }
 
-        public void OnReceiveData(ref PS4RemotePlayInterceptor.DualShockState state)
+        public void OnReceiveData(ref byte[] state)
         {
             if (MacroPlayer.IsPlaying)
             {
@@ -253,11 +253,6 @@ namespace PlaystationMacro.Classes
             else if (Script.CurrentState != null)
             {
                 state = ScriptHostUtility.ConvertAPIToInterceptorState(Script.CurrentState);
-                state.ReportTimeStamp = DateTime.Now;
-
-                // Replace battery status
-                state.Battery = 100;
-                state.IsCharging = true;
             }
         }
 

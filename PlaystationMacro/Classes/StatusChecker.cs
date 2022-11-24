@@ -168,7 +168,7 @@ namespace PlaystationMacro.Classes
             OnStatusChanged?.Invoke();
         }
 
-        public void OnReceiveData(ref DualShockState state)
+        public void OnReceiveData(ref byte[] state)
         {
             UpdateStatus(InterceptorStatus);
         }

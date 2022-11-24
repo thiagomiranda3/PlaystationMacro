@@ -128,8 +128,8 @@ namespace PlaystationMacro.Classes
             }
         }
 
-        private List<DualShockState> m_Sequence = new List<DualShockState>();
-        public List<DualShockState> Sequence
+        private List<byte[]> m_Sequence = new List<byte[]>();
+        public List<byte[]> Sequence
         {
             get { return m_Sequence; }
             set
@@ -158,7 +158,7 @@ namespace PlaystationMacro.Classes
             IsPaused = false;
             IsRecording = false;
             CurrentTick = 0;
-            Sequence = new List<DualShockState>();
+            Sequence = new List<byte[]>();
         }
 
 
@@ -188,7 +188,7 @@ namespace PlaystationMacro.Classes
 
         public void Clear()
         {
-            Sequence = new List<DualShockState>();
+            Sequence = new List<byte[]>();
             CurrentTick = 0;
         }
 
@@ -202,41 +202,8 @@ namespace PlaystationMacro.Classes
             DualShockState.Serialize(path, Sequence);
         }
 
-        public void OnReceiveData(ref DualShockState state)
+        public void OnReceiveData(ref byte[] state)
         {
-            // Record shortcut trigger
-            if (RecordShortcut)
-            {
-                // Down
-                if (state.TouchButton)
-                {
-                    if (!m_RecordShortcutDown)
-                    {
-                        m_RecordShortcutDown = true;
-                    }
-                }
-                // Up
-                else
-                {
-                    if (m_RecordShortcutDown)
-                    {
-                        m_RecordShortcutDown = false;
-
-                        // Auto play
-                        if (!IsPlaying || IsPaused)
-                            Play();
-
-                        // Record
-                        Record();
-                    }
-                }
-
-                // Override real value
-                state.TouchButton = false;
-                state.Touch1 = null;
-                state.Touch2 = null;
-            }
-
             // Playback
             if (IsPlaying && !IsPaused)
             {
@@ -248,16 +215,12 @@ namespace PlaystationMacro.Classes
                 // Playing
                 else
                 {
-                    DualShockState newState = Sequence[CurrentTick];
-                    DualShockState oldState = state;
+                    byte[] newState = Sequence[CurrentTick];
 
                     if (newState != null)
                     {
                         // Update the state
                         state = newState;
-                        // Replace battery status
-                        state.Battery = oldState.Battery;
-                        state.IsCharging = oldState.IsCharging;
                     }
                 }
 

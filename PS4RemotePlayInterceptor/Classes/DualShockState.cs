@@ -272,120 +272,6 @@ namespace PS4RemotePlayInterceptor
                     (state.Touch2 != null && state.Touch2.IsTouched);
         }
 
-        public static DualShockState ParseFromDualshockRaw(byte[] data)
-        {
-            // Validate data
-            if (data == null)
-                return null;
-            if (data[0] != 0x1)
-                return null;
-
-            // Create empty state to fill in data
-            var result = new DualShockState();
-
-            result.ReportTimeStamp = DateTime.UtcNow; // timestamp with UTC in case system time zone changes
-
-            result.LX = data[1];
-            result.LY = data[2];
-            result.RX = data[3];
-            result.RY = data[4];
-            result.L2 = data[8];
-            result.R2 = data[9];
-            result.Triangle = (data[5] & (byte)VK.Triangle) != 0;
-            result.Circle = (data[5] & (byte)VK.Circle) != 0;
-            result.Cross = (data[5] & (byte)VK.Cross) != 0;
-            result.Square = (data[5] & (byte)VK.Square) != 0;
-            result.DPad_Up = (data[5] & (byte)VK.DPad_Up) != 0;
-            result.DPad_Down = (data[5] & (byte)VK.DPad_Down) != 0;
-            result.DPad_Left = (data[5] & (byte)VK.DPad_Left) != 0;
-            result.DPad_Right = (data[5] & (byte)VK.DPad_Right) != 0;
-
-            //Convert dpad into individual On/Off bits instead of a clock representation
-            byte dpadState = 0;
-
-            dpadState = (byte)(
-            ((result.DPad_Right ? 1 : 0) << 0) |
-            ((result.DPad_Left ? 1 : 0) << 1) |
-            ((result.DPad_Down ? 1 : 0) << 2) |
-            ((result.DPad_Up ? 1 : 0) << 3));
-
-            switch (dpadState)
-            {
-                case 0: result.DPad_Up = true; result.DPad_Down = false; result.DPad_Left = false; result.DPad_Right = false; break; // ↑
-                case 1: result.DPad_Up = true; result.DPad_Down = false; result.DPad_Left = false; result.DPad_Right = true; break; // ↑→
-                case 2: result.DPad_Up = false; result.DPad_Down = false; result.DPad_Left = false; result.DPad_Right = true; break; // →
-                case 3: result.DPad_Up = false; result.DPad_Down = true; result.DPad_Left = false; result.DPad_Right = true; break; // ↓→
-                case 4: result.DPad_Up = false; result.DPad_Down = true; result.DPad_Left = false; result.DPad_Right = false; break; // ↓
-                case 5: result.DPad_Up = false; result.DPad_Down = true; result.DPad_Left = true; result.DPad_Right = false; break; // ↓←
-                case 6: result.DPad_Up = false; result.DPad_Down = false; result.DPad_Left = true; result.DPad_Right = false; break; // ←
-                case 7: result.DPad_Up = true; result.DPad_Down = false; result.DPad_Left = true; result.DPad_Right = false; break; // ↑←
-                case 8: result.DPad_Up = false; result.DPad_Down = false; result.DPad_Left = false; result.DPad_Right = false; break; // -
-            }
-
-            bool L2Pressed = (data[6] & (byte)VK.L2) != 0;
-            bool R2Pressed = (data[6] & (byte)VK.R2) != 0;
-            result.L1 = (data[6] & (byte)VK.L1) != 0;
-            result.R1 = (data[6] & (byte)VK.R1) != 0;
-            result.Share = (data[6] & (byte)VK.Share) != 0;
-            result.Options = (data[6] & (byte)VK.Options) != 0;
-            result.L3 = (data[6] & (byte)VK.L3) != 0;
-            result.R3 = (data[6] & (byte)VK.R3) != 0;
-            result.PS = (data[7] & (byte)VK.PS) != 0;
-            result.TouchButton = (data[7] & (byte)VK.TouchButton) != 0;
-
-            result.FrameCounter = (byte)(data[7] >> 2);
-
-            // Charging/Battery
-            try
-            {
-                result.IsCharging = (data[30] & 0x10) != 0;
-                result.Battery = (byte)((data[30] & 0x0F) * 10);
-
-                if (data[30] != priorInputReport30)
-                    priorInputReport30 = data[30];
-            }
-            catch { throw new InterceptorException("Index out of bounds: battery"); }
-
-            // Accelerometer
-            byte[] accel = new byte[6];
-            Array.Copy(data, 14, accel, 0, 6);
-            result.AccelX = (short)((ushort)(accel[2] << 8) | accel[3]);
-            result.AccelY = (short)((ushort)(accel[0] << 8) | accel[1]);
-            result.AccelZ = (short)((ushort)(accel[4] << 8) | accel[5]);
-
-            // Gyro
-            byte[] gyro = new byte[6];
-            Array.Copy(data, 20, gyro, 0, 6);
-            result.GyroX = (short)((ushort)(gyro[0] << 8) | gyro[1]);
-            result.GyroY = (short)((ushort)(gyro[2] << 8) | gyro[3]);
-            result.GyroZ = (short)((ushort)(gyro[4] << 8) | gyro[5]);
-
-            try
-            {
-                for (int touches = data[-1 + TOUCHPAD_DATA_OFFSET - 1], touchOffset = 0; touches > 0; touches--, touchOffset += 9)
-                {
-                    //bool touchLeft = (data[1 + TOUCHPAD_DATA_OFFSET + touchOffset] + ((data[2 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0x0F) * 255) >= 1920 * 2 / 5) ? false : true;
-                    //bool touchRight = (data[1 + TOUCHPAD_DATA_OFFSET + touchOffset] + ((data[2 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0x0F) * 255) < 1920 * 2 / 5) ? false : true;
-
-                    byte touchID1 = (byte)(data[0 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0x7F);
-                    byte touchID2 = (byte)(data[4 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0x7F);
-                    bool isTouch1 = (data[0 + TOUCHPAD_DATA_OFFSET + touchOffset] >> 7) != 0 ? false : true; // >= 1 touch detected
-                    bool isTouch2 = (data[4 + TOUCHPAD_DATA_OFFSET + touchOffset] >> 7) != 0 ? false : true; // 2 touches detected
-                    int currentX1 = data[1 + TOUCHPAD_DATA_OFFSET + touchOffset] + ((data[2 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0x0F) * 255);
-                    int currentY1 = ((data[2 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0xF0) >> 4) + (data[3 + TOUCHPAD_DATA_OFFSET + touchOffset] * 16);
-                    int currentX2 = data[5 + TOUCHPAD_DATA_OFFSET + touchOffset] + ((data[6 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0x0F) * 255);
-                    int currentY2 = ((data[6 + TOUCHPAD_DATA_OFFSET + touchOffset] & 0xF0) >> 4) + (data[7 + TOUCHPAD_DATA_OFFSET + touchOffset] * 16);
-
-                    result.TouchPacketCounter = data[-1 + TOUCHPAD_DATA_OFFSET + touchOffset];
-                    result.Touch1 = new Touch(touchID1, isTouch1, currentX1, currentY1);
-                    result.Touch2 = new Touch(touchID2, isTouch2, currentX2, currentY2);
-                }
-            }
-            catch { throw new InterceptorException("Index out of bounds: touchpad"); }
-
-            return result;
-        }
-
         public void ConvertToDualshockRaw(ref byte[] data)
         {
             data[1] = LX;
@@ -508,9 +394,9 @@ namespace PS4RemotePlayInterceptor
         /// <summary>
         /// Serialize a list of DualShockState to xml file
         /// </summary>
-        public static void Serialize(string path, List<DualShockState> list)
+        public static void Serialize(string path, List<byte[]> list)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(List<DualShockState>));
+            XmlSerializer serializer = new XmlSerializer(typeof(List<byte[]>));
             using (TextWriter writer = new StreamWriter(path))
             {
                 serializer.Serialize(writer, list);
@@ -520,13 +406,13 @@ namespace PS4RemotePlayInterceptor
         /// <summary>
         /// Deserialize a list of DualShockState from xml file
         /// </summary>
-        public static List<DualShockState> Deserialize(string path)
+        public static List<byte[]> Deserialize(string path)
         {
             XmlSerializer deserializer = new XmlSerializer(typeof(List<DualShockState>));
             using (TextReader reader = new StreamReader(path))
             {
                 object obj = deserializer.Deserialize(reader);
-                List<DualShockState> list = obj as List<DualShockState>;
+                List<byte[]> list = obj as List<byte[]>;
                 return list;
             }
         }

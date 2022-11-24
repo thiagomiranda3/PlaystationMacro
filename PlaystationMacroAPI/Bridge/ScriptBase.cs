@@ -83,7 +83,7 @@ namespace PlaystationMacroAPI
         /// <summary>
         /// The current button state
         /// </summary>
-        public DualShockState CurrentState { get; private set; }
+        public byte[] CurrentState { get; private set; }
 
         /// <summary>
         /// The current screenshot frame
@@ -176,7 +176,7 @@ namespace PlaystationMacroAPI
         /// <param name="state"></param>
         /// <param name="delay"></param>
         /// <returns>Returns self</returns>
-        public ScriptBase Press(DualShockState state, int delay = DEFAULT_PRESS_BUTTONS_DELAY)
+        public ScriptBase Press(byte[] state, int delay = DEFAULT_PRESS_BUTTONS_DELAY)
         {
             SetButtons(state);
             Host.Sleep(delay);
@@ -190,7 +190,7 @@ namespace PlaystationMacroAPI
         /// </summary>
         /// <param name="state"></param>
         /// <returns>Returns self</returns>
-        public ScriptBase SetButtons(DualShockState state)
+        public ScriptBase SetButtons(byte[] state)
         {
             CurrentState = state;
             return this;
@@ -429,7 +429,7 @@ namespace PlaystationMacroAPI
         /// <param name="sequence"></param>
         /// <param name="suspendDelay"></param>
         /// <returns>Returns self</returns>
-        public ScriptBase PlayMacro(List<DualShockState> sequence, int suspendDelay = 0)
+        public ScriptBase PlayMacro(List<byte[]> sequence, int suspendDelay = 0)
         {
             Host.PlayMacro(sequence);
             return this;

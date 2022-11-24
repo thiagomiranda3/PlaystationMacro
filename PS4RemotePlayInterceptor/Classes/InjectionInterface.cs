@@ -95,7 +95,7 @@ namespace PS4RemotePlayInterceptor
             //Console.WriteLine("OnCreateFile {0} | {1}", filename, mode);
         }
 
-        public void OnReadFile(string filename, ref byte[] inputReport)
+        public void OnReadFile(string filename, ref byte[] state)
         {
             try
             {
@@ -104,18 +104,12 @@ namespace PS4RemotePlayInterceptor
                 // Expect inputReport to be modified
                 if (Interceptor.Callback != null)
                 {
-                    // Parse the state
-                    var state = DualShockState.ParseFromDualshockRaw(inputReport);
-
                     // Skip if state is invalid
                     if (state == null)
                         return;
 
                     // Expect it to be modified
                     Interceptor.Callback(ref state);
-
-                    // Convert it back
-                    state.ConvertToDualshockRaw(ref inputReport);
                 }
             }
             catch (Exception) { }
