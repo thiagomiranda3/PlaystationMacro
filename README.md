@@ -1,21 +1,21 @@
 # Playstation Macro
 
-This project is a fork of the awesome [PS4Macro](https://github.com/komefai/PS4Macro), forked to work for PS5 too, along with all the new control sensors and buttons
+This project is a fork of the awesome [PlaystationMacro](https://github.com/komefai/PlaystationMacro), forked to work for PS5 too, along with all the new control sensors and buttons
 
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/fold_left.svg?style=social&label=Follow%20Me)](https://twitter.com/itskomefai)
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](http://paypal.me/Komefai)
 
 Automation utility for PS4 Remote Play written in C# using [PS4RemotePlayInterceptor](https://github.com/komefai/PS4RemotePlayInterceptor).
 
-🔔 **Download latest version [here](https://github.com/komefai/PS4Macro/releases)!**
+🔔 **Download latest version [here](https://github.com/komefai/PlaystationMacro/releases)!**
 
 #### Screenshot
 
-![Screenshot](https://raw.githubusercontent.com/komefai/PS4Macro/master/_resources/Screenshot_0_5_2.png)
+![Screenshot](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/Screenshot_0_5_2.png)
 
 ## Usage
 
-⚠️ To use WITHOUT a controller plugged in, see `EmulateController` in [Settings](https://github.com/komefai/PS4Macro#settings) section below.
+⚠️ To use WITHOUT a controller plugged in, see `EmulateController` in [Settings](https://github.com/komefai/PlaystationMacro#settings) section below.
 
 ##### Easy Way (shortcut)
 
@@ -29,7 +29,7 @@ To record, click on `RECORD` button (Ctrl+R) to arm recording then press `PLAY` 
 
 ## Settings
 
-You can create `settings.xml` using a text editor and place it in the same folder as `PS4Macro.exe` to override default settings.
+You can create `settings.xml` using a text editor and place it in the same folder as `PlaystationMacro.exe` to override default settings.
 
 | Setting | Description | Default
 | --- | --- | --- |
@@ -54,7 +54,7 @@ You can create `settings.xml` using a text editor and place it in the same folde
 
 ## Command Line Arguments
 
-As of version 0.5.0, you can pass command line arguments to PS4Macro.exe and override the values in settings.xml. This also allows you to create multiple shortcuts to PS4Macro.exe and have each of them override the settings when switching between games (recommended for advanced users).
+As of version 0.5.0, you can pass command line arguments to PlaystationMacro.exe and override the values in settings.xml. This also allows you to create multiple shortcuts to PlaystationMacro.exe and have each of them override the settings when switching between games (recommended for advanced users).
 
 #### Arguments
 
@@ -67,20 +67,20 @@ As of version 0.5.0, you can pass command line arguments to PS4Macro.exe and ove
 ##### Override settings using arguments
 
 ```bash
-C:\> PS4Macro.exe --AutoInject --EmulateController --ShowConsole=false --StartupFile="C:\macro.xml"
+C:\> PlaystationMacro.exe --AutoInject --EmulateController --ShowConsole=false --StartupFile="C:\macro.xml"
 ```
 
 ##### Override default settings file (highest priority)
 
 ```bash
-C:\> PS4Macro.exe --SettingsFile="C:\custom-settings.xml"
+C:\> PlaystationMacro.exe --SettingsFile="C:\custom-settings.xml"
 ```
 
 ##### Using Windows shortcut
 
-Right-click on `PS4Macro.exe` and click on `Create shortcut` to create a new shortcut. Right-click on the newly created shortcut and select `Properties` and append your command line arguments after the existing text in the `Target` field.
+Right-click on `PlaystationMacro.exe` and click on `Create shortcut` to create a new shortcut. Right-click on the newly created shortcut and select `Properties` and append your command line arguments after the existing text in the `Target` field.
 
-![Command Line Shortcut](https://raw.githubusercontent.com/komefai/PS4Macro/master/_resources/CmdShortcut.png)
+![Command Line Shortcut](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/CmdShortcut.png)
 
 ## Remapper
 
@@ -90,22 +90,22 @@ To map a key to a button or a macro, edit the **Key** cell and enter your desire
 
 To add a recorded macro, click on `...` to browse and select an xml macro file.
 
-![Remapper](https://raw.githubusercontent.com/komefai/PS4Macro/master/_resources/Remapper.png)
+![Remapper](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/Remapper.png)
 
 ## Scripting
 
 C# scripting support has been introduced in version 0.3.0 and later. This allows us to create custom behaviors beyond repeating macros with an easy-to-use API. The API also includes wrapped convenience functions such as pressing buttons, timing, and taking a screenshot from PS4 Remote Play. 
 
-See the [scripting video tutorial](https://youtu.be/daCb97rbimA) to get started or see [the wiki](https://github.com/komefai/PS4Macro/wiki) for full documentation, examples, and other information.
+See the [scripting video tutorial](https://youtu.be/daCb97rbimA) to get started or see [the wiki](https://github.com/komefai/PlaystationMacro/wiki) for full documentation, examples, and other information.
 
-NOTE: The script have to include a reference to `PS4MacroAPI.dll` to interface with PS4Macro. At the moment the scripts has to be compiled into a DLL file to be able to open with PS4 Macro.
+NOTE: The script have to include a reference to `PlaystationMacroAPI.dll` to interface with PlaystationMacro. At the moment the scripts has to be compiled into a DLL file to be able to open with PS4 Macro.
 
 ##### Basic Example Script
 
 This example script will press DPad up and wait one second, follow by pressing square. The loop repeats every 800ms.
 
 ```csharp
-using PS4MacroAPI;
+using PlaystationMacroAPI;
 
 public class Script : ScriptBase
 {
@@ -134,9 +134,9 @@ public class Script : ScriptBase
 
 #### List of Scripts
 
-- [Keyboard Remapping Utility](https://github.com/komefai/PS4Macro.Remote)
-- [Marvel Heroes Omega Bot](https://github.com/komefai/PS4Macro.MarvelHeroesOmega)
-- [PES2018 Bot (Simulator Mode)](https://github.com/leguims/PS4Macro.PES2018Lite) by [leguims](https://github.com/leguims)
+- [Keyboard Remapping Utility](https://github.com/komefai/PlaystationMacro.Remote)
+- [Marvel Heroes Omega Bot](https://github.com/komefai/PlaystationMacro.MarvelHeroesOmega)
+- [PES2018 Bot (Simulator Mode)](https://github.com/leguims/PlaystationMacro.PES2018Lite) by [leguims](https://github.com/leguims)
 
 ---
 
@@ -150,7 +150,7 @@ public class Script : ScriptBase
 
 => Make sure you unplug every DualShock 4 controllers from your computer (otherwise the real controller will take priority over the emulated one). Start PS4 Remote Play, follow by PS4 Macro and wait for this screen. If you see the text `Press the OPTIONS button on the controller to start.` then it means that the emulated controller is working correctly. You can then press the Start button.
 
-![Emulate Controller Troubleshoot](https://raw.githubusercontent.com/komefai/PS4Macro/master/_resources/EmulateControllerTroubleshoot.png)
+![Emulate Controller Troubleshoot](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/EmulateControllerTroubleshoot.png)
 
 ##### Visual Studio Build Error
 

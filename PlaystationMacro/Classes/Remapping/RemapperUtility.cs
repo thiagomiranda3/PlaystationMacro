@@ -1,0 +1,434 @@
+﻿// PlaystationMacro(File: Classes/Remapping/RemapperUtility.cs)
+//
+// Copyright (c) 2018 Komefai
+//
+// Visit http://komefai.com for more information
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace PlaystationMacro.Classes.Remapping
+{
+    public class RemapperUtility
+    {
+        #region WindowInfo
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr FindWindow(string strClassName, string strWindowName);
+
+        [DllImport("user32", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private extern static bool EnumThreadWindows(int threadId, EnumWindowsProc callback, IntPtr lParam);
+
+        [DllImport("user32", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool EnumChildWindows(IntPtr hwndParent, EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32", SetLastError = true, CharSet = CharSet.Auto)]
+        private extern static int GetWindowText(IntPtr hWnd, StringBuilder text, int maxCount);
+
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        private static IntPtr FindWindowInProcess(Process process, Func<string, bool> compareTitle)
+        {
+            IntPtr windowHandle = IntPtr.Zero;
+
+            foreach (ProcessThread t in process.Threads)
+            {
+                windowHandle = FindWindowInThread(t.Id, compareTitle);
+                if (windowHandle != IntPtr.Zero)
+                {
+                    break;
+                }
+            }
+
+            return windowHandle;
+        }
+
+        private static IntPtr FindWindowInThread(int threadId, Func<string, bool> compareTitle)
+        {
+            IntPtr windowHandle = IntPtr.Zero;
+            EnumThreadWindows(threadId, (hWnd, lParam) =>
+            {
+                StringBuilder text = new StringBuilder(200);
+                GetWindowText(hWnd, text, 200);
+                if (compareTitle(text.ToString()))
+                {
+                    windowHandle = hWnd;
+                    return false;
+                }
+                return true;
+            }, IntPtr.Zero);
+
+            return windowHandle;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hwnd, ref RECT rectangle);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left, Top, Right, Bottom;
+
+            public RECT(int left, int top, int right, int bottom)
+            {
+                Left = left;
+                Top = top;
+                Right = right;
+                Bottom = bottom;
+            }
+
+            public RECT(System.Drawing.Rectangle r) : this(r.Left, r.Top, r.Right, r.Bottom) { }
+
+            public int X
+            {
+                get { return Left; }
+                set { Right -= (Left - value); Left = value; }
+            }
+
+            public int Y
+            {
+                get { return Top; }
+                set { Bottom -= (Top - value); Top = value; }
+            }
+
+            public int Height
+            {
+                get { return Bottom - Top; }
+                set { Bottom = value + Top; }
+            }
+
+            public int Width
+            {
+                get { return Right - Left; }
+                set { Right = value + Left; }
+            }
+
+            public System.Drawing.Point Location
+            {
+                get { return new System.Drawing.Point(Left, Top); }
+                set { X = value.X; Y = value.Y; }
+            }
+
+            public System.Drawing.Size Size
+            {
+                get { return new System.Drawing.Size(Width, Height); }
+                set { Width = value.Width; Height = value.Height; }
+            }
+
+            public static implicit operator System.Drawing.Rectangle(RECT r)
+            {
+                return new System.Drawing.Rectangle(r.Left, r.Top, r.Width, r.Height);
+            }
+
+            public static implicit operator RECT(System.Drawing.Rectangle r)
+            {
+                return new RECT(r);
+            }
+
+            public static bool operator ==(RECT r1, RECT r2)
+            {
+                return r1.Equals(r2);
+            }
+
+            public static bool operator !=(RECT r1, RECT r2)
+            {
+                return !r1.Equals(r2);
+            }
+
+            public bool Equals(RECT r)
+            {
+                return r.Left == Left && r.Top == Top && r.Right == Right && r.Bottom == Bottom;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is RECT)
+                    return Equals((RECT)obj);
+                else if (obj is System.Drawing.Rectangle)
+                    return Equals(new RECT((System.Drawing.Rectangle)obj));
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return ((System.Drawing.Rectangle)this).GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return string.Format(System.Globalization.CultureInfo.CurrentCulture, "{{Left={0},Top={1},Right={2},Bottom={3}}}", Left, Top, Right, Bottom);
+            }
+        }
+
+        public static Rectangle FindWindowLocation(Process process)
+        {
+            IntPtr handle = process.MainWindowHandle;
+            RECT rect = new RECT();
+            GetWindowRect(handle, ref rect);
+            return rect;
+        }
+        #endregion
+
+        #region SetCursorPosition
+        [DllImport("user32.dll")]
+        private static extern IntPtr SetCursorPos(int x, int y);
+
+        public static void SetCursorPosition(int x, int y)
+        {
+            SetCursorPos(x, y);
+        }
+
+        public static void SetCursorPosition(Point p)
+        {
+            SetCursorPos(p.Y, p.Y);
+        }
+        #endregion
+
+        #region ShowSystemCursor
+        [Flags]
+        public enum SPIF
+        {
+            None = 0x00,
+            SPIF_UPDATEINIFILE = 0x01,
+            SPIF_SENDCHANGE = 0x02,
+            SPIF_SENDWININICHANGE = 0x02
+        }
+        [Flags]
+        public enum SPI
+        {
+            None = 0x00,
+            SPIF_UPDATEINIFILE = 0x01,
+            SPIF_SENDCHANGE = 0x02,
+            SPIF_SENDWININICHANGE = 0x02
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SystemParametersInfo(SPI uiAction, uint uiParam, IntPtr pvParam, SPIF fWinIni);
+
+        // For setting a string parameter
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, String pvParam, SPIF fWinIni);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetSystemCursor(IntPtr hcur, uint id);
+        enum OCR_SYSTEM_CURSORS : uint
+        {
+            /// <summary>
+            /// Standard arrow and small hourglass
+            /// </summary>
+            OCR_APPSTARTING = 32650,
+            /// <summary>
+            /// Standard arrow
+            /// </summary>
+            OCR_NORMAL = 32512,
+            /// <summary>
+            /// Crosshair
+            /// </summary>
+            OCR_CROSS = 32515,
+            /// <summary>
+            /// Windows 2000/XP: Hand
+            /// </summary>
+            OCR_HAND = 32649,
+            /// <summary>
+            /// Arrow and question mark
+            /// </summary>
+            OCR_HELP = 32651,
+            /// <summary>
+            /// I-beam
+            /// </summary>
+            OCR_IBEAM = 32513,
+            /// <summary>
+            /// Slashed circle
+            /// </summary>
+            OCR_NO = 32648,
+            /// <summary>
+            /// Four-pointed arrow pointing north, south, east, and west
+            /// </summary>
+            OCR_SIZEALL = 32646,
+            /// <summary>
+            /// Double-pointed arrow pointing northeast and southwest
+            /// </summary>
+            OCR_SIZENESW = 32643,
+            /// <summary>
+            /// Double-pointed arrow pointing north and south
+            /// </summary>
+            OCR_SIZENS = 32645,
+            /// <summary>
+            /// Double-pointed arrow pointing northwest and southeast
+            /// </summary>
+            OCR_SIZENWSE = 32642,
+            /// <summary>
+            /// Double-pointed arrow pointing west and east
+            /// </summary>
+            OCR_SIZEWE = 32644,
+            /// <summary>
+            /// Vertical arrow
+            /// </summary>
+            OCR_UP = 32516,
+            /// <summary>
+            /// Hourglass
+            /// </summary>
+            OCR_WAIT = 32514
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+        [DllImport("user32.dll")]
+        private static extern IntPtr LoadCursorFromFile(string lpFileName);
+
+        private static byte[] _transparentCursor = CreateTransparentCursor();
+        private static byte[] CreateTransparentCursor()
+        {
+            var b = new byte[326];
+
+            b[2] = 0x02; b[4] = 0x01; b[6] = 0x20; b[7] = 0x02;
+            b[14] = 0x30; b[15] = 0x01; b[18] = 0x16; b[22] = 0x28;
+            b[26] = 0x20; b[30] = 0x40; b[34] = 0x01; b[36] = 0x01;
+            b[42] = 0x80; b[54] = 0x02;
+
+            for (var i = 198; i < 326; i++)
+            {
+                b[i] = 0xFF;
+            }
+
+            return b;
+        }
+
+        public static bool ShowSystemCursor(bool show)
+        {
+            try
+            {
+                if (!show)
+                {
+                    // Load the cursor
+                    var cursorFile = Path.GetTempFileName();
+                    using (var fs = new FileStream(cursorFile, FileMode.Create, FileAccess.Write))
+                    {
+                        fs.Write(_transparentCursor, 0, _transparentCursor.Length);
+                    }
+
+                    // Set the cursor
+                    IntPtr cursor = LoadCursorFromFile(cursorFile);
+                    SetSystemCursor(cursor, (uint)OCR_SYSTEM_CURSORS.OCR_NORMAL);
+
+                    // Delete temp file
+                    File.Delete(cursorFile);
+                }
+                else
+                {
+                    // Reset the cursor
+                    SystemParametersInfo(0x0057, 0, null, 0);
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+        #endregion
+
+        #region ShowStreamingToolBar
+        private const int SW_HIDE = 0;
+        private const int SW_SHOW = 5;
+
+        [DllImport("User32")]
+        private static extern int ShowWindow(int hwnd, int nCmdShow);
+
+        public static void ShowStreamingToolBar(Process process, bool show)
+        {
+            IntPtr streamingToolBar = FindWindowInProcess(process, title => title.Equals("StreamingToolBar"));
+            if (streamingToolBar != IntPtr.Zero)
+            {
+                ShowWindow(streamingToolBar.ToInt32(), show ? SW_SHOW : SW_HIDE);
+            }
+        }
+        #endregion
+
+        #region IsProcessInForeground
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        public static bool IsProcessInForeground(Process process)
+        {
+            if (process == null)
+                return false;
+            if (process.HasExited)
+                return false;
+
+            // Check for focused window
+            var activeWindow = GetForegroundWindow();
+            if (activeWindow == IntPtr.Zero)
+                return false;
+            if (activeWindow != process.MainWindowHandle)
+                return false;
+
+            return true;
+        }
+        #endregion
+
+        // https://stackoverflow.com/questions/13270183/type-conversion-issue-when-setting-property-through-reflection
+        public static void SetValue(object inputObject, string propertyName, object propertyVal)
+        {
+            //find out the type
+            Type type = inputObject.GetType();
+
+            //get the property information based on the type
+            System.Reflection.PropertyInfo propertyInfo = type.GetProperty(propertyName);
+
+            //find the property type
+            Type propertyType = propertyInfo.PropertyType;
+
+            //Convert.ChangeType does not handle conversion to nullable types
+            //if the property type is nullable, we need to get the underlying type of the property
+            var targetType = IsNullableType(propertyInfo.PropertyType) ? Nullable.GetUnderlyingType(propertyInfo.PropertyType) : propertyInfo.PropertyType;
+
+            //Returns an System.Object with the specified System.Type and whose value is
+            //equivalent to the specified object.
+            propertyVal = Convert.ChangeType(propertyVal, targetType);
+
+            //Set the value of the property
+            propertyInfo.SetValue(inputObject, propertyVal, null);
+
+        }
+
+        public static bool IsNullableType(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
+        }
+
+        // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection-in-c-sharp
+        public static object GetValue(object src, string propName)
+        {
+            return src.GetType().GetProperty(propName).GetValue(src, null);
+        }
+    }
+}
