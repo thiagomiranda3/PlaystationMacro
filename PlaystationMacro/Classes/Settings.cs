@@ -35,15 +35,12 @@ namespace PlaystationMacro.Classes
     {
         public const string FILE_PATH = "settings.xml";
 
-        public bool AutoInject { get; set; }
         public bool BypassInjection { get; set; }
-        public bool EmulateController { get; set; }
         public bool ShowConsole { get; set; }
         public string StartupFile { get; set; }
 
         public Settings()
         {
-            AutoInject = false;
             BypassInjection = false;
             ShowConsole = false;
             StartupFile = null;

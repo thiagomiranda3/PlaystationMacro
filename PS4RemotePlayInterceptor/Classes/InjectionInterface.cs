@@ -123,18 +123,5 @@ namespace PS4RemotePlayInterceptor
             }
             catch (Exception) { }
         }
-
-
-        /* Config Wrappers */
-
-        public bool ShouldEmulateController()
-        {
-            try
-            {
-                return Interceptor.EmulateController;
-            }
-            catch (Exception) { return false; }
-            
-        }
     }
 }

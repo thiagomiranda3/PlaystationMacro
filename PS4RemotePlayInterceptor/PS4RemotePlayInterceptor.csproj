@@ -52,7 +52,6 @@
     <Compile Include="Classes\Interceptor.cs" />
     <Compile Include="Classes\InterceptorException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Classes\Watchdog.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="EasyHook32.dll">

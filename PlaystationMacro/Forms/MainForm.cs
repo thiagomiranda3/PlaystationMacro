@@ -41,19 +41,14 @@ namespace PlaystationMacro.Forms
     enum ControlMode
     {
         Macro,
-        Script,
-        StatusChecker
+        Script
     }
 
     public partial class MainForm : Form
     {
         private const string CURRENT_TICK_DEFAULT_TEXT = "-";
 
-        private GlobalKeyboardHook m_GlobalKeyboardHook;
-        private GlobalMouseHook m_GlobalMouseHook;
-
         private MacroPlayer m_MacroPlayer;
-        private StatusChecker m_StatusChecker;
 
         private ControlMode m_ControlMode;
 
@@ -69,22 +64,10 @@ namespace PlaystationMacro.Forms
         {
             InitializeComponent();
 
-            // Setup global keyboard hook
-            m_GlobalKeyboardHook = new GlobalKeyboardHook();
-            m_GlobalKeyboardHook.KeyboardPressed += OnKeyPressed;
-
-            // Setup global mouse hook
-            m_GlobalMouseHook = new GlobalMouseHook();
-            m_GlobalMouseHook.MouseEvent += OnMouseEvent;
-
             // Create macro player
             m_MacroPlayer = new MacroPlayer();
             m_MacroPlayer.Loop = true;
-            m_MacroPlayer.RecordShortcut = true;
             m_MacroPlayer.PropertyChanged += MacroPlayer_PropertyChanged;
-
-            // Create status checker
-            m_StatusChecker = new StatusChecker();
 
             // Set control mode
             SetControlMode(ControlMode.Macro);
@@ -99,15 +82,7 @@ namespace PlaystationMacro.Forms
 
         private void InitInterceptor()
         {
-            // Set controller emulation based on settings
-            Interceptor.EmulateController = Program.Settings.EmulateController;
-            emulatedToolStripStatusLabel.Visible = Program.Settings.EmulateController;
-
-            // Enable watchdog based on settings
-            if (!Program.Settings.AutoInject)
-            {
-                Interceptor.InjectionMode = InjectionMode.Compatibility;
-            }
+            Interceptor.InjectionMode = InjectionMode.Compatibility;
 
             // Inject if not bypassed
             if (!Program.Settings.BypassInjection)
@@ -117,9 +92,6 @@ namespace PlaystationMacro.Forms
                 {
                     int pid = Interceptor.Inject();
                     m_RemotePlayProcess = Process.GetProcessById(pid);
-
-                    // Set process
-                    ForwardRemotePlayProcess();
                 }
                 // Injection failed
                 catch (InterceptorException ex)
@@ -132,29 +104,9 @@ namespace PlaystationMacro.Forms
                     }
                     else
                     {
-                        // Handle exception if watchdog is disabled
-                        if (!Program.Settings.AutoInject)
-                        {
-                            MessageBox.Show(string.Format("[{0}] - {1}", ex.GetType(), ex.Message), "Injection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            Environment.Exit(-1);
-                        }
+                        MessageBox.Show(string.Format("[{0}] - {1}", ex.GetType(), ex.Message), "Injection Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Environment.Exit(-1);
                     }
-                }
-
-                // Start watchdog to automatically inject when possible
-                if (Program.Settings.AutoInject)
-                {
-                    Interceptor.Watchdog.Start();
-
-                    // Watchdog callbacks
-                    Interceptor.Watchdog.OnInjectionSuccess = () =>
-                    {
-                        ForwardRemotePlayProcess();
-                    };
-                    Interceptor.Watchdog.OnInjectionFailure = () =>
-                    {
-
-                    };
                 }
             }
         }
@@ -205,18 +157,6 @@ namespace PlaystationMacro.Forms
                 clearMacroToolStripMenuItem.Enabled = false;
                 currentTickToolStripStatusLabel.Text = CURRENT_TICK_DEFAULT_TEXT;
             }
-            else if (m_ControlMode == ControlMode.StatusChecker)
-            {
-                // Stop macro player
-                if (m_MacroPlayer.IsRecording) m_MacroPlayer.Record();
-                m_MacroPlayer.Stop();
-
-                // Stop script
-                if (m_ScriptHost != null && m_ScriptHost.IsRunning) m_ScriptHost.Stop();
-
-                // Setup callback to interceptor
-                Interceptor.Callback = new InterceptionDelegate(m_StatusChecker.OnReceiveData);
-            }
         }
 
         private void TemporarilySetControlMode(ControlMode controlMode, Action action)
@@ -230,11 +170,6 @@ namespace PlaystationMacro.Forms
 
             // Restore control mode
             SetControlMode(oldControlMode);
-        }
-
-        private void ForwardRemotePlayProcess()
-        {
-            m_StatusChecker.RemotePlayProcess = m_RemotePlayProcess;
         }
 
         public void LoadMacro(string path)
@@ -252,22 +187,6 @@ namespace PlaystationMacro.Forms
             m_ScriptHost.PropertyChanged += ScriptHost_PropertyChanged;
 
             SetControlMode(ControlMode.Script);
-        }
-
-        private void OnKeyPressed(object sender, GlobalKeyboardHookEventArgs e)
-        {
-            if (m_ControlMode == ControlMode.StatusChecker)
-            {
-                m_StatusChecker.OnKeyPressed(sender, e);
-            }
-        }
-
-        private void OnMouseEvent(object sender, GlobalMouseHookEventArgs e)
-        {
-            if (m_ControlMode == ControlMode.StatusChecker)
-            {
-                m_StatusChecker.OnMouseEvent(sender, e);
-            }
         }
 
 
@@ -541,16 +460,6 @@ namespace PlaystationMacro.Forms
         #endregion
 
         #region Help
-        private void statusCheckerToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TemporarilySetControlMode(ControlMode.StatusChecker, () =>
-            {
-                m_StatusChecker.SetActive(true);
-                new StatusCheckerForm(m_StatusChecker).ShowDialog(this);
-                m_StatusChecker.SetActive(false);
-            });
-        }
-
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var aboutForm = new AboutForm();

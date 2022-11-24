@@ -102,112 +102,14 @@ namespace PS4RemotePlayInterceptor
             // Install hooks
             List<EasyHook.LocalHook> hooks = new List<LocalHook>();
 
-            // With controller emulation
-            if (_server.ShouldEmulateController())
-            {
-                // CreateFile https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
-                var createFileHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CreateFileW"),
-                    new CreateFile_Delegate(CreateFile_Hook),
-                    this);
+            // ReadFile https://msdn.microsoft.com/en-us/library/windows/desktop/aa365467(v=vs.85).aspx
+            var readFileHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "ReadFile"),
+                new ReadFile_Delegate(ReadFile_Hook),
+                this);
 
-                // ReadFile https://msdn.microsoft.com/en-us/library/windows/desktop/aa365467(v=vs.85).aspx
-                var readFileHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("kernel32.dll", "ReadFile"),
-                    new ReadFile_Delegate(ReadFile_Hook),
-                    this);
-
-                // WriteFile https://msdn.microsoft.com/en-us/library/windows/desktop/aa365747(v=vs.85).aspx
-                var writeFileHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("kernel32.dll", "WriteFile"),
-                    new WriteFile_Delegate(WriteFile_Hook),
-                    this);
-
-                // HidD_GetAttributes http://www.pinvoke.net/default.aspx/hid.hidd_getattributes
-                var HidD_GetAttributesHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_GetAttributes"),
-                    new HidD_GetAttributes_Delegate(HidD_GetAttributes_Hook),
-                    this);
-
-                // HidD_GetFeature http://www.pinvoke.net/default.aspx/hid.hidd_getfeature
-                var HidD_GetFeatureHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_GetFeature"),
-                    new HidD_GetFeature_Delegate(HidD_GetFeature_Hook),
-                    this);
-
-                // HidD_SetFeature https://msdn.microsoft.com/en-us/library/windows/hardware/ff539684(v=vs.85).aspx
-                var HidD_SetFeatureHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_SetFeature"),
-                    new HidD_SetFeature_Delegate(HidD_SetFeature_Hook),
-                    this);
-
-                // HidD_GetPreparsedData http://www.pinvoke.net/default.aspx/hid.hidd_getfeature
-                var HidD_GetPreparsedDataHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_GetPreparsedData"),
-                    new HidD_GetPreparsedData_Delegate(HidD_GetPreparsedData_Hook),
-                    this);
-
-                // HidD_FreePreparsedData http://www.pinvoke.net/default.aspx/hid.hidd_freepreparseddata
-                var HidD_FreePreparsedDataHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_FreePreparsedData"),
-                    new HidD_FreePreparsedData_Delegate(HidD_FreePreparsedData_Hook),
-                    this);
-
-                // HidD_GetManufacturerString https://msdn.microsoft.com/en-us/library/windows/hardware/ff538959(v=vs.85).aspx
-                var HidD_GetManufacturerStringHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_GetManufacturerString"),
-                    new HidD_GetManufacturerString_Delegate(HidD_GetManufacturerString_Hook),
-                    this);
-
-                // HidD_GetProductString https://msdn.microsoft.com/en-us/library/windows/hardware/ff539681(v=vs.85).aspx
-                var HidD_GetProductStringHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_GetProductString"),
-                    new HidD_GetProductString_Delegate(HidD_GetProductString_Hook),
-                    this);
-
-                // HidD_GetSerialNumberString https://msdn.microsoft.com/en-us/library/windows/hardware/ff539683(v=vs.85).aspx
-                var HidD_GetSerialNumberStringHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidD_GetSerialNumberString"),
-                    new HidD_GetSerialNumberString_Delegate(HidD_GetSerialNumberString_Hook),
-                    this);
-
-                // HidP_GetCapsHook http://www.pinvoke.net/default.aspx/hid.hidp_getcaps
-                var HidP_GetCapsHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidP_GetCaps"),
-                    new HidP_GetCaps_Delegate(HidP_GetCaps_Hook),
-                    this);
-
-                // HidP_GetValueCapsHook https://msdn.microsoft.com/en-us/library/windows/hardware/ff539754(v=vs.85).aspx
-                var HidP_GetValueCapsHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("hid.dll", "HidP_GetValueCaps"),
-                    new HidP_GetValueCaps_Delegate(HidP_GetValueCaps_Hook),
-                    this);
-
-                hooks.Add(createFileHook);
-                hooks.Add(readFileHook);
-                hooks.Add(writeFileHook);
-                hooks.Add(HidD_GetAttributesHook);
-                hooks.Add(HidD_GetFeatureHook);
-                hooks.Add(HidD_SetFeatureHook);
-                hooks.Add(HidD_GetPreparsedDataHook);
-                hooks.Add(HidD_FreePreparsedDataHook);
-                hooks.Add(HidD_GetManufacturerStringHook);
-                hooks.Add(HidD_GetProductStringHook);
-                hooks.Add(HidD_GetSerialNumberStringHook);
-                hooks.Add(HidP_GetCapsHook);
-                hooks.Add(HidP_GetValueCapsHook);
-            }
-            // Without controller emulation
-            else
-            {
-                // ReadFile https://msdn.microsoft.com/en-us/library/windows/desktop/aa365467(v=vs.85).aspx
-                var readFileHook = EasyHook.LocalHook.Create(
-                    EasyHook.LocalHook.GetProcAddress("kernel32.dll", "ReadFile"),
-                    new ReadFile_Delegate(ReadFile_Hook),
-                    this);
-
-                hooks.Add(readFileHook);
-            }
+            hooks.Add(readFileHook);
+            
 
             // Activate hooks on all threads except the current thread
             foreach (var h in hooks)
@@ -437,90 +339,41 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
+                // Call original first so we have a value for lpNumberOfBytesRead
+                result = ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, out lpNumberOfBytesRead, lpOverlapped);
+
+                try
                 {
-                    // SPOOF
-                    result = true;
-                    try
+                    // Retrieve filename from the file handle
+                    StringBuilder filename = new StringBuilder(255);
+                    GetFinalPathNameByHandle(hFile, filename, 255, 0);
+
+                    //// Log for debug
+                    //_server.ReportLog(
+                    //    string.Format("[{0}:{1}]: READ ({2} bytes) \"{3}\"",
+                    //    EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()
+                    //    , lpNumberOfBytesRead, filename));
+
+                    // Only respond if it is a device stream
+                    if (string.IsNullOrWhiteSpace(filename.ToString()) && lpNumberOfBytesRead == bufferSize)
                     {
-                        // Call original for any other files
-                        if (hFile != _dummyHandle)
+                        // Copy unmanaged array for server
+                        byte[] managedArray = ToManagedArray(lpBuffer, bufferSize);
+
+                        // Make sure it is a input report (USB type)
+                        if (managedArray[0] == 0x1)
                         {
-                            result = ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, out lpNumberOfBytesRead, lpOverlapped);
-                        }
-
-                        // Retrieve filename from the file handle
-                        StringBuilder filename = new StringBuilder(255);
-                        GetFinalPathNameByHandle(hFile, filename, 255, 0);
-
-                        if (hFile == _dummyHandle && nNumberOfBytesToRead == 2048 && lpNumberOfBytesRead == 0)
-                        {
-                            lpNumberOfBytesRead = bufferSize;
-
-                            // Create fake report buffer
-                            byte[] fakeReport = fakeReport = new byte[bufferSize]
-                            {
-                                1, 128, 126, 125, 125, 8, 0, 0, 0, 0, 151, 201, 14, 7, 0, 5, 0, 255, 255, 179, 7, 74, 31,
-                                113, 255, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 0, 128, 0, 0, 0, 128, 0,
-                                0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 0, 128, 0
-                            };
-
-                            // Assign the spoofed frame counter
-                            __frameCounter++;
-                            fakeReport[7] = (byte)((__frameCounter << 2) & 0xFF);
-
                             // Send to server
-                            _server.OnReadFile(filename.ToString(), ref fakeReport);
+                            _server.OnReadFile(filename.ToString(), ref managedArray);
 
                             // Restore managedArray back to unmanaged array
-                            RestoreUnmanagedArray(lpBuffer, fakeReport.Length, fakeReport);
-
-                            return result;
+                            RestoreUnmanagedArray(lpBuffer, bufferSize, managedArray);
                         }
-                    }
-                    catch
-                    {
-                        // swallow exceptions so that any issues caused by this code do not crash target process
                     }
                 }
-                else
+                catch
                 {
-                    // Call original first so we have a value for lpNumberOfBytesRead
-                    result = ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, out lpNumberOfBytesRead, lpOverlapped);
-
-                    try
-                    {
-                        // Retrieve filename from the file handle
-                        StringBuilder filename = new StringBuilder(255);
-                        GetFinalPathNameByHandle(hFile, filename, 255, 0);
-
-                        //// Log for debug
-                        //_server.ReportLog(
-                        //    string.Format("[{0}:{1}]: READ ({2} bytes) \"{3}\"",
-                        //    EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()
-                        //    , lpNumberOfBytesRead, filename));
-
-                        // Only respond if it is a device stream
-                        if (string.IsNullOrWhiteSpace(filename.ToString()) && lpNumberOfBytesRead == bufferSize)
-                        {
-                            // Copy unmanaged array for server
-                            byte[] managedArray = ToManagedArray(lpBuffer, bufferSize);
-
-                            // Make sure it is a input report (USB type)
-                            if (managedArray[0] == 0x1)
-                            {
-                                // Send to server
-                                _server.OnReadFile(filename.ToString(), ref managedArray);
-
-                                // Restore managedArray back to unmanaged array
-                                RestoreUnmanagedArray(lpBuffer, bufferSize, managedArray);
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // swallow exceptions so that any issues caused by this code do not crash target process
-                    }
+                    // swallow exceptions so that any issues caused by this code do not crash target process
                 }
             }
             catch
@@ -629,20 +482,8 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = true;
-                    attributes.Size = 12;
-                    attributes.VendorID = 1356;
-                    attributes.ProductID = 2508;
-                    attributes.VersionNumber = 256;
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetAttributes(hidDeviceObject, ref attributes);
-                }
+                // Call original first so we get the result
+                result = HidD_GetAttributes(hidDeviceObject, ref attributes);
             }
             catch
             {
@@ -666,53 +507,8 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = true;
-
-                    // Copy unmanaged array for server
-                    unsafe
-                    {
-                        fixed (byte* p = &lpReportBuffer)
-                        {
-                            IntPtr ptr = (IntPtr)p;
-
-                            if (lpReportBuffer == 0x12)
-                            {
-                                byte[] report =
-                                {
-                                    18, 198, 3, 170, 95, 27, 64, 8, 37, 0, 172, 252, 74, 74, 71, 168
-                                };
-                                RestoreUnmanagedArray(ptr, report.Length, report);
-                            }
-                            else if (lpReportBuffer == 0xA3)
-                            {
-                                byte[] report =
-                                {
-                                    163, 77, 97, 121, 32, 49, 55, 32, 50, 48, 49, 54, 0, 0, 0, 0, 0, 48, 54, 58,
-                                    51, 54, 58, 50, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 100, 1, 0, 0, 0, 8, 112, 0, 2, 0,
-                                    128, 3, 0
-                                };
-                                RestoreUnmanagedArray(ptr, report.Length, report);
-                            }
-                            else if (lpReportBuffer == 0x02)
-                            {
-                                byte[] report =
-                                {
-                                    2, 6, 0, 3, 0, 252, 255, 133, 34, 133, 221, 237, 34, 31, 221, 228, 35, 13,
-                                    220, 28, 2, 28, 2, 250, 31, 5, 224, 83, 32, 173, 223, 211, 31, 46, 224, 7, 0
-                                };
-                                RestoreUnmanagedArray(ptr, report.Length, report);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetFeature(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-                }
+                // Call original first so we get the result
+                result = HidD_GetFeature(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
             }
             catch
             {
@@ -736,16 +532,7 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = true;
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_SetFeature(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-                }
+                result = HidD_SetFeature(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
             }
             catch
             {
@@ -769,16 +556,7 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = true;
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetPreparsedData(hidDeviceObject, ref preparsedData);
-                }
+                result = HidD_GetPreparsedData(hidDeviceObject, ref preparsedData);
             }
             catch
             {
@@ -802,16 +580,8 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = true;
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_FreePreparsedData(preparsedData);
-                }
+                // Call original first so we get the result
+                result = HidD_FreePreparsedData(preparsedData);
             }
             catch
             {
@@ -835,36 +605,7 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = true;
-                    unsafe
-                    {
-                        fixed (byte* p = &lpReportBuffer)
-                        {
-                            IntPtr ptr = (IntPtr)p;
-                            byte[] data =
-                            {
-                                83, 0, 111, 0, 110, 0, 121, 0, 32, 0, 73, 0, 110, 0, 116, 0, 101, 0, 114, 0, 97,
-                                0, 99, 0, 116, 0, 105, 0, 118, 0, 101, 0, 32, 0, 69, 0, 110, 0, 116, 0, 101, 0, 114, 0, 116,
-                                0, 97, 0, 105, 0, 110, 0, 109, 0, 101, 0, 110, 0, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                            };
-                            RestoreUnmanagedArray(ptr, data.Length, data);
-                        }
-                    }
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetManufacturerString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-                }
+                result = HidD_GetManufacturerString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
             }
             catch
             {
@@ -888,39 +629,7 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetProductString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-
-                    // SPOOF
-                    result = true;
-                    unsafe
-                    {
-                        fixed (byte* p = &lpReportBuffer)
-                        {
-                            IntPtr ptr = (IntPtr)p;
-                            byte[] data =
-                            {
-                                87, 0, 105, 0, 114, 0, 101, 0, 108, 0, 101, 0, 115, 0, 115, 0, 32, 0, 67, 0, 111,
-                                0, 110, 0, 116, 0, 114, 0, 111, 0, 108, 0, 108, 0, 101, 0, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                            };
-                            RestoreUnmanagedArray(ptr, data.Length, data);
-                        }
-                    }
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetProductString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-                }
+                result = HidD_GetProductString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
             }
             catch
             {
@@ -944,19 +653,7 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetSerialNumberString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-
-                    // SPOOF
-                    result = true;
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidD_GetSerialNumberString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-                }
+                result = HidD_GetSerialNumberString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
             }
             catch
             {
@@ -1002,32 +699,8 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = 0x110000;
-                    capabilities.Usage = 5;
-                    capabilities.UsagePage = 1;
-                    capabilities.InputReportByteLength = 64;
-                    capabilities.OutputReportByteLength = 32;
-                    capabilities.FeatureReportByteLength = 64;
-
-                    capabilities.NumberLinkCollectionNodes = 1;
-                    capabilities.NumberInputButtonCaps = 1;
-                    capabilities.NumberInputValueCaps = 9;
-                    capabilities.NumberInputDataIndices = 23;
-                    capabilities.NumberOutputButtonCaps = 0;
-                    capabilities.NumberOutputValueCaps = 1;
-                    capabilities.NumberOutputDataIndices = 1;
-                    capabilities.NumberFeatureButtonCaps = 0;
-                    capabilities.NumberFeatureValueCaps = 48;
-                    capabilities.NumberFeatureDataIndices = 48;
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidP_GetCaps(preparsedData, ref capabilities);
-                }
+                // Call original first so we get the result
+                result = HidP_GetCaps(preparsedData, ref capabilities);
             }
             catch
             {
@@ -1146,112 +819,8 @@ namespace PS4RemotePlayInterceptor
 
             try
             {
-                if (_server.ShouldEmulateController())
-                {
-                    // SPOOF
-                    result = 0x110000;
-                    unsafe
-                    {
-                        fixed (byte* p = &valueCaps)
-                        {
-                            IntPtr ptr = (IntPtr)p;
-                            byte[] managedArray = ToManagedArray(ptr, 3456);
-                            managedArray[0] = 0x0;
-                            managedArray[1] = 0xFF;
-                            managedArray[2] = 0x4;
-                            managedArray[3] = 0x0;
-                            managedArray[4] = 0x2;
-                            managedArray[5] = 0x0;
-                            managedArray[6] = 0x0;
-                            managedArray[7] = 0x0;
-                            managedArray[8] = 0x5;
-                            managedArray[9] = 0x0;
-                            managedArray[10] = 0x1;
-                            managedArray[11] = 0x0;
-                            managedArray[12] = 0x0;
-                            managedArray[13] = 0x0;
-                            managedArray[14] = 0x0;
-                            managedArray[15] = 0x1;
-                            managedArray[16] = 0x0;
-                            //managedArray[17] = managedArray[17];
-                            managedArray[18] = 0x8;
-                            managedArray[19] = 0x0;
-                            managedArray[20] = 0x24;
-                            managedArray[21] = 0x0;
-                            //managedArray[22] = managedArray[22];
-                            //managedArray[23] = managedArray[23];
-                            //managedArray[24] = managedArray[24];
-                            //managedArray[25] = managedArray[25];
-                            //managedArray[26] = managedArray[26];
-                            //managedArray[27] = managedArray[27];
-                            //managedArray[28] = managedArray[28];
-                            //managedArray[29] = managedArray[29];
-                            //managedArray[30] = managedArray[30];
-                            //managedArray[31] = managedArray[31];
-                            managedArray[32] = 0x0;
-                            managedArray[33] = 0x0;
-                            managedArray[34] = 0x0;
-                            managedArray[35] = 0x0;
-                            managedArray[36] = 0x0;
-                            managedArray[37] = 0x0;
-                            managedArray[38] = 0x0;
-                            managedArray[39] = 0x0;
-                            managedArray[40] = 0x0;
-                            managedArray[41] = 0x0;
-                            managedArray[42] = 0x0;
-                            managedArray[43] = 0x0;
-                            managedArray[44] = 0xFF;
-                            managedArray[45] = 0x0;
-                            managedArray[46] = 0x0;
-                            managedArray[47] = 0x0;
-
-                            managedArray[48] = 0x0;
-                            managedArray[49] = 0x0;
-                            managedArray[50] = 0x0;
-                            managedArray[51] = 0x0;
-                            managedArray[52] = 0x3B;
-                            managedArray[53] = 0x01;
-                            managedArray[54] = 0x0;
-                            managedArray[55] = 0x23;
-                            managedArray[56] = 0x0;
-                            managedArray[57] = 0x23;
-                            managedArray[58] = 0x0;
-                            managedArray[59] = 0x0;
-                            managedArray[60] = 0x0;
-                            managedArray[61] = 0x0;
-                            managedArray[62] = 0x0;
-                            managedArray[63] = 0x0;
-                            managedArray[64] = 0x0;
-                            managedArray[65] = 0x0;
-                            managedArray[66] = 0x0;
-                            managedArray[67] = 0x0;
-
-                            //managedArray[72] = 0x80; // a3
-                            //managedArray[128] = 0x43; // a4
-                            //managedArray[74] = 0xA3; // a5
-                            //managedArray[92] = 0x30; // a6
-
-                            var i = 72 + 20;
-                            while (i + 36 < 3456)
-                            {
-                                managedArray[i - 20] = 0x80;
-                                managedArray[i + 36] = 0x43;
-                                managedArray[i] = 0x30;
-                                managedArray[i - 18] = 0xA3;
-                                managedArray[i - 19] = 0xFF;
-
-                                i += 72;
-                            }
-
-                            RestoreUnmanagedArray(ptr, managedArray.Length, managedArray);
-                        }
-                    }
-                }
-                else
-                {
-                    // Call original first so we get the result
-                    result = HidP_GetValueCaps_Hook(reportType, ref valueCaps, ref valueCapsLength, preparsedData);
-                }
+                // Call original first so we get the result
+                result = HidP_GetValueCaps_Hook(reportType, ref valueCaps, ref valueCapsLength, preparsedData);
             }
             catch
             {

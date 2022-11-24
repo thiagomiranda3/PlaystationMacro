@@ -34,7 +34,6 @@
             this.stopButton = new System.Windows.Forms.Button();
             this.recordButton = new System.Windows.Forms.Button();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.emulatedToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.fileNameToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.separatorToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.currentTickToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -110,7 +109,6 @@
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.emulatedToolStripStatusLabel,
             this.fileNameToolStripStatusLabel,
             this.separatorToolStripStatusLabel,
             this.currentTickToolStripStatusLabel});
@@ -119,12 +117,6 @@
             this.statusStrip.Size = new System.Drawing.Size(314, 22);
             this.statusStrip.SizingGrip = false;
             this.statusStrip.TabIndex = 5;
-            // 
-            // emulatedToolStripStatusLabel
-            // 
-            this.emulatedToolStripStatusLabel.Image = global::PlaystationMacro.Properties.Resources.icon_joystick;
-            this.emulatedToolStripStatusLabel.Name = "emulatedToolStripStatusLabel";
-            this.emulatedToolStripStatusLabel.Size = new System.Drawing.Size(16, 17);
             // 
             // fileNameToolStripStatusLabel
             // 
@@ -301,13 +293,6 @@
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
-            // statusCheckerToolStripMenuItem
-            // 
-            this.statusCheckerToolStripMenuItem.Name = "statusCheckerToolStripMenuItem";
-            this.statusCheckerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.statusCheckerToolStripMenuItem.Text = "Status Checker";
-            this.statusCheckerToolStripMenuItem.Click += new System.EventHandler(this.statusCheckerToolStripMenuItem_Click);
-            // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
@@ -411,7 +396,6 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.Button scriptButton;
-        private System.Windows.Forms.ToolStripStatusLabel emulatedToolStripStatusLabel;
         private System.Windows.Forms.CheckBox loopCheckBox;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem loopToolStripMenuItem;

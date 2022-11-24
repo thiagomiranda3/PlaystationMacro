@@ -153,7 +153,6 @@ namespace PlaystationMacro.Classes
         public MacroPlayer()
         {
             Loop = false;
-            RecordShortcut = false;
             IsPlaying = false;
             IsPaused = false;
             IsRecording = false;
@@ -240,12 +239,6 @@ namespace PlaystationMacro.Classes
                     {
                         Stop();
                     }
-                }
-
-                // Emulation delay compensation
-                if (Program.Settings.EmulateController)
-                {
-                    System.Threading.Thread.Sleep(1);
                 }
             }
         }

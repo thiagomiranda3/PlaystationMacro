@@ -60,15 +60,10 @@ namespace PS4RemotePlayInterceptor
         private static IpcServerChannel _ipcServer;
         private static bool _noGAC = false;
 
-        // Watchdog
-        private static Watchdog m_Watchdog = new Watchdog();
-        public static Watchdog Watchdog => m_Watchdog;
         public static DateTime LastPingTime { get; set; }
 
         // Injection
         public static InjectionMode InjectionMode = InjectionMode.Auto;
-        // Emulation
-        public static bool EmulateController = false;
 
         // Delegate
         public static InterceptionDelegate Callback { get; set; }
