@@ -44,5 +44,10 @@ namespace PlaystationMacro.Forms
         {
             System.Diagnostics.Process.Start("http://komefai.com");
         }
+
+        private void titleLabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
