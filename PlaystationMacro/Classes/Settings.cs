@@ -45,7 +45,6 @@ namespace PlaystationMacro.Classes
         {
             AutoInject = false;
             BypassInjection = false;
-            EmulateController = false;
             ShowConsole = false;
             StartupFile = null;
         }
