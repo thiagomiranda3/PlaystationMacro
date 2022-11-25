@@ -1,11 +1,8 @@
 # Playstation Macro
 
-This project is a fork of the awesome [PlaystationMacro](https://github.com/komefai/PlaystationMacro), forked to work for PS5 too, along with all the new control sensors and buttons
+This project is a fork of the awesome [PS4Macro](https://github.com/komefai/PS4Macro), forked to work for PS5 too, along with all the new control sensors and buttons that PS5 controller has.
 
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/fold_left.svg?style=social&label=Follow%20Me)](https://twitter.com/itskomefai)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](http://paypal.me/Komefai)
-
-Automation utility for PS4 Remote Play written in C# using [PS4RemotePlayInterceptor](https://github.com/komefai/PS4RemotePlayInterceptor).
+Automation utility for PS4 and PS5 Remote Play written in C#.
 
 🔔 **Download latest version [here](https://github.com/komefai/PlaystationMacro/releases)!**
 
@@ -23,74 +20,9 @@ Press the touch button on your controller (touchpad) to start recording and pres
 
 > NOTE: If you're using the touch button in the macro then disable it by going to Playback->Record On Touch
 
-##### Manual Way
+##### How to use
 
 To record, click on `RECORD` button (Ctrl+R) to arm recording then press `PLAY` to start recording controls. The red text on the bottom right indicates the number of frames recorded. You can stop recording by clicking on `RECORD` button (Ctrl+R) again. The macro will then play the controls in a loop.
-
-## Settings
-
-You can create `settings.xml` using a text editor and place it in the same folder as `PlaystationMacro.exe` to override default settings.
-
-| Setting | Description | Default
-| --- | --- | --- |
-| AutoInject | Automatically poll for PS4 Remote Play and inject whenever possible | false |
-| BypassInjection | Bypass the injection for debugging purposes | false |
-| EmulateController | Run with controller emulation (use without a controller) | false |
-| ShowConsole | Open debugging console on launch | false |
-| StartupFile | Absolute or relative path to the file to load on launch (can be xml or dll) | null |
-
-##### Example settings.xml
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<Settings>
-  <AutoInject>true</AutoInject>
-  <BypassInjection>false</BypassInjection>
-  <EmulateController>true</EmulateController>
-  <ShowConsole>true</ShowConsole>
-  <StartupFile>MyMacro.xml</StartupFile>
-</Settings>
-```
-
-## Command Line Arguments
-
-As of version 0.5.0, you can pass command line arguments to PlaystationMacro.exe and override the values in settings.xml. This also allows you to create multiple shortcuts to PlaystationMacro.exe and have each of them override the settings when switching between games (recommended for advanced users).
-
-#### Arguments
-
-| Argument | Description | Default
-| --- | --- | --- |
-| SettingsFile | Absolute or relative path to the settings file (will take priority) | null |
-
-#### Examples
-
-##### Override settings using arguments
-
-```bash
-C:\> PlaystationMacro.exe --AutoInject --EmulateController --ShowConsole=false --StartupFile="C:\macro.xml"
-```
-
-##### Override default settings file (highest priority)
-
-```bash
-C:\> PlaystationMacro.exe --SettingsFile="C:\custom-settings.xml"
-```
-
-##### Using Windows shortcut
-
-Right-click on `PlaystationMacro.exe` and click on `Create shortcut` to create a new shortcut. Right-click on the newly created shortcut and select `Properties` and append your command line arguments after the existing text in the `Target` field.
-
-![Command Line Shortcut](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/CmdShortcut.png)
-
-## Remapper
-
-Remapper allows you to use your keyboard to control PS4 games with customizable key bindings. To use Remapper, go to Tools->Remapper and focus on PS4 Remote Play to control the game. Simply close the window to return to marco or script mode.
-
-To map a key to a button or a macro, edit the **Key** cell and enter your desire key. You can find the key from the **Member name** column in [this table](https://msdn.microsoft.com/en-us/library/system.windows.forms.keys(v=vs.110).aspx) (eg. `Delete`, `NumPad4`, `PageDown`). Use key `None` to completely disable the key.
-
-To add a recorded macro, click on `...` to browse and select an xml macro file.
-
-![Remapper](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/Remapper.png)
 
 ## Scripting
 
@@ -140,43 +72,8 @@ public class Script : ScriptBase
 
 ---
 
-## Troubleshoot
-
-##### Macro not playing/recording
-
-=> Disable AutoInject in settings.xml since some machines does not support AutoInject.
-
-##### EmulateController does not work
-
-=> Make sure you unplug every DualShock 4 controllers from your computer (otherwise the real controller will take priority over the emulated one). Start PS4 Remote Play, follow by PS4 Macro and wait for this screen. If you see the text `Press the OPTIONS button on the controller to start.` then it means that the emulated controller is working correctly. You can then press the Start button.
-
-![Emulate Controller Troubleshoot](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/EmulateControllerTroubleshoot.png)
-
-##### Visual Studio Build Error
-
-=> Reinstall NuGet Package.
-
-```
-Update-Package –reinstall PS4RemotePlayInterceptor
-```
-
-## To-Do List
-
-- Improve scripting API docs
-- Playback timeline UI
-- Macro editor tool
-- Mouse support for Remapper
-- ...
-
-## Resources
-
-- [Making Of Video](https://youtu.be/txI9AOEAk58)
-- [Scripting Tutorial Video](https://youtu.be/daCb97rbimA)
-- [Prototype Demo Video](https://youtu.be/QjTZsPR-BcI)
-
 ## Credits
 
 - [EasyHook](https://easyhook.github.io/)
-- [Jays2Kings/DS4Windows](https://github.com/Jays2Kings/DS4Windows)
-- [jforshee/ImageHashing](https://github.com/jforshee/ImageHashing)
 - [Mono.Options](https://www.nuget.org/packages/Mono.Options/)
+- [PS4Macro](https://github.com/komefai/PS4Macro)
