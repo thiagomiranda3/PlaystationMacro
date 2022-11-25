@@ -6,17 +6,7 @@ Automation utility for PS4 and PS5 Remote Play written in C#.
 
 🔔 **Download latest version [here](https://github.com/komefai/PlaystationMacro/releases)!**
 
-## Usage
-
-⚠️ To use WITHOUT a controller plugged in, see `EmulateController` in [Settings](https://github.com/komefai/PlaystationMacro#settings) section below.
-
-##### Easy Way (shortcut)
-
-Press the touch button on your controller (touchpad) to start recording and press it again to stop.
-
-> NOTE: If you're using the touch button in the macro then disable it by going to Playback->Record On Touch
-
-##### How to use
+## How to use
 
 To record, click on `RECORD` button (Ctrl+R) to arm recording then press `PLAY` to start recording controls. The red text on the bottom right indicates the number of frames recorded. You can stop recording by clicking on `RECORD` button (Ctrl+R) again. The macro will then play the controls in a loop.
 
