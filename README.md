@@ -6,10 +6,6 @@ Automation utility for PS4 and PS5 Remote Play written in C#.
 
 🔔 **Download latest version [here](https://github.com/komefai/PlaystationMacro/releases)!**
 
-#### Screenshot
-
-![Screenshot](https://raw.githubusercontent.com/komefai/PlaystationMacro/master/_resources/Screenshot_0_5_2.png)
-
 ## Usage
 
 ⚠️ To use WITHOUT a controller plugged in, see `EmulateController` in [Settings](https://github.com/komefai/PlaystationMacro#settings) section below.
