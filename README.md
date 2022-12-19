@@ -4,7 +4,7 @@ This project is a fork of the awesome [PS4Macro](https://github.com/komefai/PS4M
 
 Automation utility for PS4 and PS5 Remote Play written in C#.
 
-🔔 **Download latest version [here](https://github.com/komefai/PlaystationMacro/releases)!**
+🔔 **Download latest version [here](https://github.com/thiagomiranda3/PlaystationMacro/releases/download/0.5.2/PlaystationMacro.zip)!**
 
 ## How to use
 
