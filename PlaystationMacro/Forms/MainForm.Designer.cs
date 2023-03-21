@@ -60,7 +60,6 @@
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusHighlightLabel = new System.Windows.Forms.Label();
-            this.scriptButton = new System.Windows.Forms.Button();
             this.loopCheckBox = new System.Windows.Forms.CheckBox();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
@@ -127,7 +126,7 @@
             // separatorToolStripStatusLabel
             // 
             this.separatorToolStripStatusLabel.Name = "separatorToolStripStatusLabel";
-            this.separatorToolStripStatusLabel.Size = new System.Drawing.Size(200, 17);
+            this.separatorToolStripStatusLabel.Size = new System.Drawing.Size(216, 17);
             this.separatorToolStripStatusLabel.Spring = true;
             // 
             // currentTickToolStripStatusLabel
@@ -243,21 +242,21 @@
             // playToolStripMenuItem
             // 
             this.playToolStripMenuItem.Name = "playToolStripMenuItem";
-            this.playToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.playToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.playToolStripMenuItem.Text = "Play";
             this.playToolStripMenuItem.Click += new System.EventHandler(this.playToolStripMenuItem_Click);
             // 
             // pauseToolStripMenuItem
             // 
             this.pauseToolStripMenuItem.Name = "pauseToolStripMenuItem";
-            this.pauseToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.pauseToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.pauseToolStripMenuItem.Text = "Pause";
             this.pauseToolStripMenuItem.Click += new System.EventHandler(this.pauseToolStripMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
             // 
@@ -265,21 +264,21 @@
             // 
             this.recordToolStripMenuItem.Name = "recordToolStripMenuItem";
             this.recordToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.recordToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.recordToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.recordToolStripMenuItem.Text = "Record";
             this.recordToolStripMenuItem.Click += new System.EventHandler(this.recordToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(162, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
             // 
             // loopToolStripMenuItem
             // 
             this.loopToolStripMenuItem.Checked = true;
             this.loopToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.loopToolStripMenuItem.Name = "loopToolStripMenuItem";
-            this.loopToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.loopToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.loopToolStripMenuItem.Text = "Loop";
             this.loopToolStripMenuItem.Click += new System.EventHandler(this.loopToolStripMenuItem_Click);
             // 
@@ -293,15 +292,20 @@
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
+            // statusCheckerToolStripMenuItem
+            // 
+            this.statusCheckerToolStripMenuItem.Name = "statusCheckerToolStripMenuItem";
+            this.statusCheckerToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(104, 6);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -312,16 +316,6 @@
             this.statusHighlightLabel.Name = "statusHighlightLabel";
             this.statusHighlightLabel.Size = new System.Drawing.Size(314, 2);
             this.statusHighlightLabel.TabIndex = 7;
-            // 
-            // scriptButton
-            // 
-            this.scriptButton.Location = new System.Drawing.Point(246, 33);
-            this.scriptButton.Name = "scriptButton";
-            this.scriptButton.Size = new System.Drawing.Size(56, 23);
-            this.scriptButton.TabIndex = 8;
-            this.scriptButton.Text = "Script";
-            this.scriptButton.UseVisualStyleBackColor = true;
-            this.scriptButton.Click += new System.EventHandler(this.scriptButton_Click);
             // 
             // loopCheckBox
             // 
@@ -343,7 +337,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(314, 89);
             this.Controls.Add(this.loopCheckBox);
-            this.Controls.Add(this.scriptButton);
             this.Controls.Add(this.statusHighlightLabel);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
@@ -395,7 +388,6 @@
         private System.Windows.Forms.ToolStripMenuItem recordToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.Button scriptButton;
         private System.Windows.Forms.CheckBox loopCheckBox;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem loopToolStripMenuItem;

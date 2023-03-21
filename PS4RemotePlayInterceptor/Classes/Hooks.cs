@@ -41,11 +41,6 @@ namespace PS4RemotePlayInterceptor
         /// </summary>
         private readonly InjectionInterface _server = null;
 
-        /// <summary>
-        /// Dummy handle used for controller emulation
-        /// </summary>
-        private readonly IntPtr _dummyHandle = new IntPtr(0xDABDAB);
-
         private static byte[] ToManagedArray(IntPtr pointer, int size)
         {
             byte[] managedArray = new byte[size];
@@ -99,33 +94,20 @@ namespace PS4RemotePlayInterceptor
             // Injection is now complete and the server interface is connected
             _server.OnInjectionSuccess(EasyHook.RemoteHooking.GetCurrentProcessId());
 
-            // Install hooks
-            List<EasyHook.LocalHook> hooks = new List<LocalHook>();
-
             // ReadFile https://msdn.microsoft.com/en-us/library/windows/desktop/aa365467(v=vs.85).aspx
             var readFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "ReadFile"),
                 new ReadFile_Delegate(ReadFile_Hook),
                 this);
 
-            hooks.Add(readFileHook);
-            
-
-            // Activate hooks on all threads except the current thread
-            foreach (var h in hooks)
-            {
-                h.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            }
-
-            // Wake up the process (required if using RemoteHooking.CreateAndInject)
-            EasyHook.RemoteHooking.WakeUpProcess();
+            readFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             try
             {
                 // Loop until injector closes (i.e. IPC fails)
                 while (true)
                 {
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(500);
                     _server.Ping();
                 }
             }
@@ -134,11 +116,7 @@ namespace PS4RemotePlayInterceptor
                 // Ping() will raise an exception if host is unreachable
             }
 
-            // Remove hooks
-            foreach (var h in hooks)
-            {
-                h.Dispose();
-            }
+            readFileHook.Dispose();
 
             // Finalise cleanup of hooks
             EasyHook.LocalHook.Release();
@@ -158,129 +136,7 @@ namespace PS4RemotePlayInterceptor
 
         #endregion
 
-        #region CreateFileW Hook
-        /// <summary>
-        /// The CreateFile delegate, this is needed to create a delegate of our hook function <see cref="CreateFile_Hook(string, uint, uint, IntPtr, uint, uint, IntPtr)"/>.
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="desiredAccess"></param>
-        /// <param name="shareMode"></param>
-        /// <param name="securityAttributes"></param>
-        /// <param name="creationDisposition"></param>
-        /// <param name="flagsAndAttributes"></param>
-        /// <param name="templateFile"></param>
-        /// <returns></returns>
-        [UnmanagedFunctionPointer(CallingConvention.StdCall,
-                    CharSet = CharSet.Unicode,
-                    SetLastError = true)]
-        delegate IntPtr CreateFile_Delegate(
-                    String filename,
-                    UInt32 desiredAccess,
-                    UInt32 shareMode,
-                    IntPtr securityAttributes,
-                    UInt32 creationDisposition,
-                    UInt32 flagsAndAttributes,
-                    IntPtr templateFile);
-
-        /// <summary>
-        /// Using P/Invoke to call original method.
-        /// https://msdn.microsoft.com/en-us/library/windows/desktop/aa363858(v=vs.85).aspx
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="desiredAccess"></param>
-        /// <param name="shareMode"></param>
-        /// <param name="securityAttributes"></param>
-        /// <param name="creationDisposition"></param>
-        /// <param name="flagsAndAttributes"></param>
-        /// <param name="templateFile"></param>
-        /// <returns></returns>
-        [DllImport("kernel32.dll",
-            CharSet = CharSet.Unicode,
-            SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern IntPtr CreateFileW(
-            String filename,
-            UInt32 desiredAccess,
-            UInt32 shareMode,
-            IntPtr securityAttributes,
-            UInt32 creationDisposition,
-            UInt32 flagsAndAttributes,
-            IntPtr templateFile);
-
-        /// <summary>
-        /// The CreateFile hook function. This will be called instead of the original CreateFile once hooked.
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="desiredAccess"></param>
-        /// <param name="shareMode"></param>
-        /// <param name="securityAttributes"></param>
-        /// <param name="creationDisposition"></param>
-        /// <param name="flagsAndAttributes"></param>
-        /// <param name="templateFile"></param>
-        /// <returns></returns>
-        IntPtr CreateFile_Hook(
-            String filename,
-            UInt32 desiredAccess,
-            UInt32 shareMode,
-            IntPtr securityAttributes,
-            UInt32 creationDisposition,
-            UInt32 flagsAndAttributes,
-            IntPtr templateFile)
-        {
-            // SPOOF
-            if (filename != null && filename.StartsWith(@"\\?\hid#"))
-            {
-                return _dummyHandle;
-            }
-
-            IntPtr result = CreateFileW(
-                filename,
-                desiredAccess,
-                shareMode,
-                securityAttributes,
-                creationDisposition,
-                flagsAndAttributes,
-                templateFile
-            );
-
-            try
-            {
-                string mode = string.Empty;
-                switch (creationDisposition)
-                {
-                    case 1:
-                        mode = "CREATE_NEW";
-                        break;
-                    case 2:
-                        mode = "CREATE_ALWAYS";
-                        break;
-                    case 3:
-                        mode = "OPEN_ALWAYS";
-                        break;
-                    case 4:
-                        mode = "OPEN_EXISTING";
-                        break;
-                    case 5:
-                        mode = "TRUNCATE_EXISTING";
-                        break;
-                }
-
-                // Send to server
-                _server.OnCreateFile(filename.ToString(), result.ToString());
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            // now call the original API...
-            return result;
-        }
-        #endregion
-
         #region ReadFile Hook
-
-        // FrameCounter
-        private static int __frameCounter = -1;
 
         /// <summary>
         /// The ReadFile delegate, this is needed to create a delegate of our hook function <see cref="ReadFile_Hook(IntPtr, IntPtr, uint, out uint, IntPtr)"/>.
@@ -337,7 +193,9 @@ namespace PS4RemotePlayInterceptor
 
             const int bufferSize = 64;
 
-            try
+            return ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, out lpNumberOfBytesRead, lpOverlapped);
+
+            /*try
             {
                 // Call original first so we have a value for lpNumberOfBytesRead
                 result = ReadFile(hFile, lpBuffer, nNumberOfBytesToRead, out lpNumberOfBytesRead, lpOverlapped);
@@ -349,10 +207,10 @@ namespace PS4RemotePlayInterceptor
                     GetFinalPathNameByHandle(hFile, filename, 255, 0);
 
                     //// Log for debug
-                    //_server.ReportLog(
-                    //    string.Format("[{0}:{1}]: READ ({2} bytes) \"{3}\"",
-                    //    EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()
-                    //    , lpNumberOfBytesRead, filename));
+                    _server.ReportLog(
+                        string.Format("[{0}:{1}]: READ ({2} bytes) \"{3}\"",
+                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()
+                        , lpNumberOfBytesRead, filename));
 
                     // Only respond if it is a device stream
                     if (string.IsNullOrWhiteSpace(filename.ToString()) && lpNumberOfBytesRead == bufferSize)
@@ -381,453 +239,7 @@ namespace PS4RemotePlayInterceptor
                 // swallow exceptions so that any issues caused by this code do not crash target process
             }
 
-            return result;
-        }
-        #endregion
-
-        #region WriteFile Hook
-
-        /// <summary>
-        /// The WriteFile delegate, this is needed to create a delegate of our hook function <see cref="WriteFile_Hook(IntPtr, IntPtr, uint, out uint, IntPtr)"/>.
-        /// </summary>
-        /// <param name="hFile"></param>
-        /// <param name="lpBuffer"></param>
-        /// <param name="nNumberOfBytesToWrite"></param>
-        /// <param name="lpNumberOfBytesWritten"></param>
-        /// <param name="lpOverlapped"></param>
-        /// <returns></returns>
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        delegate bool WriteFile_Delegate(
-            IntPtr hFile,
-            IntPtr lpBuffer,
-            uint nNumberOfBytesToWrite,
-            out uint lpNumberOfBytesWritten,
-            IntPtr lpOverlapped);
-
-        /// <summary>
-        /// Using P/Invoke to call original WriteFile method
-        /// </summary>
-        /// <param name="hFile"></param>
-        /// <param name="lpBuffer"></param>
-        /// <param name="nNumberOfBytesToWrite"></param>
-        /// <param name="lpNumberOfBytesWritten"></param>
-        /// <param name="lpOverlapped"></param>
-        /// <returns></returns>
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool WriteFile(
-            IntPtr hFile,
-            IntPtr lpBuffer,
-            uint nNumberOfBytesToWrite,
-            out uint lpNumberOfBytesWritten,
-            IntPtr lpOverlapped);
-
-        /// <summary>
-        /// The WriteFile hook function. This will be called instead of the original WriteFile once hooked.
-        /// </summary>
-        /// <param name="hFile"></param>
-        /// <param name="lpBuffer"></param>
-        /// <param name="nNumberOfBytesToWrite"></param>
-        /// <param name="lpNumberOfBytesWritten"></param>
-        /// <param name="lpOverlapped"></param>
-        /// <returns></returns>
-        bool WriteFile_Hook(
-            IntPtr hFile,
-            IntPtr lpBuffer,
-            uint nNumberOfBytesToWrite,
-            out uint lpNumberOfBytesWritten,
-            IntPtr lpOverlapped)
-        {
-            bool result = false;
-
-            // Call original first so we get lpNumberOfBytesWritten
-            result = WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, out lpNumberOfBytesWritten, lpOverlapped);
-
-            try
-            {
-                // Retrieve filename from the file handle
-                StringBuilder filename = new StringBuilder(255);
-                GetFinalPathNameByHandle(hFile, filename, 255, 0);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-
-        #endregion
-
-        #region HidD_GetAttributes Hook
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct HIDD_ATTRIBUTES
-        {
-            public Int32 Size;
-            public Int16 VendorID;
-            public Int16 ProductID;
-            public Int16 VersionNumber;
-        }
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_GetAttributes_Delegate(IntPtr hidDeviceObject, ref HIDD_ATTRIBUTES attributes);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_GetAttributes(IntPtr hidDeviceObject, ref HIDD_ATTRIBUTES attributes);
-
-        bool HidD_GetAttributes_Hook(IntPtr hidDeviceObject, ref HIDD_ATTRIBUTES attributes)
-        {
-            bool result = false;
-
-            try
-            {
-                // Call original first so we get the result
-                result = HidD_GetAttributes(hidDeviceObject, ref attributes);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_GetFeature Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_GetFeature_Delegate(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_GetFeature(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        bool HidD_GetFeature_Hook(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength)
-        {
-            bool result = false;
-
-            try
-            {
-                // Call original first so we get the result
-                result = HidD_GetFeature(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_SetFeature Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_SetFeature_Delegate(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_SetFeature(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        bool HidD_SetFeature_Hook(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength)
-        {
-            bool result = false;
-
-            try
-            {
-                result = HidD_SetFeature(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_GetPreparsedData Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_GetPreparsedData_Delegate(IntPtr hidDeviceObject, ref IntPtr preparsedData);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_GetPreparsedData(IntPtr hidDeviceObject, ref IntPtr preparsedData);
-
-        bool HidD_GetPreparsedData_Hook(IntPtr hidDeviceObject, ref IntPtr preparsedData)
-        {
-            bool result = false;
-
-            try
-            {
-                result = HidD_GetPreparsedData(hidDeviceObject, ref preparsedData);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_FreePreparsedData Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_FreePreparsedData_Delegate(IntPtr preparsedData);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_FreePreparsedData(IntPtr preparsedData);
-
-        bool HidD_FreePreparsedData_Hook(IntPtr preparsedData)
-        {
-            bool result = false;
-
-            try
-            {
-                // Call original first so we get the result
-                result = HidD_FreePreparsedData(preparsedData);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_GetManufacturerString Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_GetManufacturerString_Delegate(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_GetManufacturerString(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        bool HidD_GetManufacturerString_Hook(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength)
-        {
-            bool result = false;
-
-            try
-            {
-                result = HidD_GetManufacturerString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_GetProductString Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_GetProductString_Delegate(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_GetProductString(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        bool HidD_GetProductString_Hook(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength)
-        {
-            bool result = false;
-
-            try
-            {
-                result = HidD_GetProductString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidD_GetSerialNumberString Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool HidD_GetSerialNumberString_Delegate(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern bool HidD_GetSerialNumberString(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength);
-
-        bool HidD_GetSerialNumberString_Hook(IntPtr hidDeviceObject, ref Byte lpReportBuffer, Int32 reportBufferLength)
-        {
-            bool result = false;
-
-            try
-            {
-                result = HidD_GetSerialNumberString(hidDeviceObject, ref lpReportBuffer, reportBufferLength);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidP_GetCaps Hook
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct HIDP_CAPS
-        {
-            public Int16 Usage;
-            public Int16 UsagePage;
-            public Int16 InputReportByteLength;
-            public Int16 OutputReportByteLength;
-            public Int16 FeatureReportByteLength;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 17)]
-            public Int16[] Reserved;
-            public Int16 NumberLinkCollectionNodes;
-            public Int16 NumberInputButtonCaps;
-            public Int16 NumberInputValueCaps;
-            public Int16 NumberInputDataIndices;
-            public Int16 NumberOutputButtonCaps;
-            public Int16 NumberOutputValueCaps;
-            public Int16 NumberOutputDataIndices;
-            public Int16 NumberFeatureButtonCaps;
-            public Int16 NumberFeatureValueCaps;
-            public Int16 NumberFeatureDataIndices;
-        }
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate int HidP_GetCaps_Delegate(IntPtr preparsedData, ref HIDP_CAPS capabilities);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern int HidP_GetCaps(IntPtr preparsedData, ref HIDP_CAPS capabilities);
-
-        int HidP_GetCaps_Hook(IntPtr preparsedData, ref HIDP_CAPS capabilities)
-        {
-            int result = 0;
-
-            try
-            {
-                // Call original first so we get the result
-                result = HidP_GetCaps(preparsedData, ref capabilities);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
-        }
-        #endregion
-
-        #region HidP_GetValueCaps Hook
-        internal enum HIDP_REPORT_TYPE
-        {
-            HidP_Input,
-            HidP_Output,
-            HidP_Feature
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct HidP_Range
-        {
-            public short UsageMin;
-            public short UsageMax;
-            public short StringMin;
-            public short StringMax;
-            public short DesignatorMin;
-            public short DesignatorMax;
-            public short DataIndexMin;
-            public short DataIndexMax;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct HidP_NotRange
-        {
-            public short Usage;
-            public short Reserved1;
-            public short StringIndex;
-            public short Reserved2;
-            public short DesignatorIndex;
-            public short Reserved3;
-            public short DataIndex;
-            public short Reserved4;
-        }
-
-        [StructLayout(LayoutKind.Explicit)]
-        public struct HidP_Value_Caps
-        {
-            [FieldOffset(0)]
-            public ushort UsagePage;
-            [FieldOffset(2)]
-            public byte ReportID;
-            [FieldOffset(3), MarshalAs(UnmanagedType.U1)]
-            public bool IsAlias;
-            [FieldOffset(4)]
-            public ushort BitField;
-            [FieldOffset(6)]
-            public ushort LinkCollection;
-            [FieldOffset(8)]
-            public ushort LinkUsage;
-            [FieldOffset(10)]
-            public ushort LinkUsagePage;
-            [FieldOffset(12), MarshalAs(UnmanagedType.U1)]
-            public bool IsRange;
-            [FieldOffset(13), MarshalAs(UnmanagedType.U1)]
-            public bool IsStringRange;
-            [FieldOffset(14), MarshalAs(UnmanagedType.U1)]
-            public bool IsDesignatorRange;
-            [FieldOffset(15), MarshalAs(UnmanagedType.U1)]
-            public bool IsAbsolute;
-            [FieldOffset(16), MarshalAs(UnmanagedType.U1)]
-            public bool HasNull;
-            [FieldOffset(17)]
-            public byte Reserved;
-            [FieldOffset(18)]
-            public short BitSize;
-            [FieldOffset(20)]
-            public short ReportCount;
-            [FieldOffset(22)]
-            public ushort Reserved2a;
-            [FieldOffset(24)]
-            public ushort Reserved2b;
-            [FieldOffset(26)]
-            public ushort Reserved2c;
-            [FieldOffset(28)]
-            public ushort Reserved2d;
-            [FieldOffset(30)]
-            public ushort Reserved2e;
-            [FieldOffset(32)]
-            public int UnitsExp;
-            [FieldOffset(36)]
-            public int Units;
-            [FieldOffset(40)]
-            public int LogicalMin;
-            [FieldOffset(44)]
-            public int LogicalMax;
-            [FieldOffset(48)]
-            public int PhysicalMin;
-            [FieldOffset(52)]
-            public int PhysicalMax;
-
-            [FieldOffset(56)]
-            public HidP_Range Range;
-            [FieldOffset(56)]
-            public HidP_NotRange NotRange;
-        }
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate int HidP_GetValueCaps_Delegate(HIDP_REPORT_TYPE reportType, ref Byte valueCaps, ref short valueCapsLength, IntPtr preparsedData);
-
-        [DllImport("hid.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        static extern int HidP_GetValueCaps(HIDP_REPORT_TYPE reportType, ref Byte valueCaps, ref short valueCapsLength, IntPtr preparsedData);
-
-        int HidP_GetValueCaps_Hook(HIDP_REPORT_TYPE reportType, ref Byte valueCaps, ref short valueCapsLength, IntPtr preparsedData)
-        {
-            int result = 0;
-
-            try
-            {
-                // Call original first so we get the result
-                result = HidP_GetValueCaps_Hook(reportType, ref valueCaps, ref valueCapsLength, preparsedData);
-            }
-            catch
-            {
-                // swallow exceptions so that any issues caused by this code do not crash target process
-            }
-
-            return result;
+            return result;*/
         }
         #endregion
     }

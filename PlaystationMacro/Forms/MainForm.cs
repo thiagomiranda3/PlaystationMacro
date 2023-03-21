@@ -23,7 +23,6 @@
 // THE SOFTWARE.
 
 using PlaystationMacro.Classes;
-using PlaystationMacro.Classes.GlobalHooks;
 using PS4RemotePlayInterceptor;
 using System;
 using System.Collections.Generic;
@@ -40,8 +39,7 @@ namespace PlaystationMacro.Forms
 {
     enum ControlMode
     {
-        Macro,
-        Script
+        Macro
     }
 
     public partial class MainForm : Form
@@ -52,12 +50,7 @@ namespace PlaystationMacro.Forms
 
         private ControlMode m_ControlMode;
 
-        private PlaystationMacroAPI.ScriptBase m_SelectedScript;
-        private ScriptHost m_ScriptHost;
-
         private SaveLoadHelper m_SaveLoadHelper;
-
-        private Process m_RemotePlayProcess;
 
         /* Constructor */
         public MainForm()
@@ -90,8 +83,7 @@ namespace PlaystationMacro.Forms
                 // Attempt to inject into PS4 Remote Play
                 try
                 {
-                    int pid = Interceptor.Inject();
-                    m_RemotePlayProcess = Process.GetProcessById(pid);
+                    Interceptor.Inject();
                 }
                 // Injection failed
                 catch (InterceptorException ex)
@@ -115,48 +107,15 @@ namespace PlaystationMacro.Forms
         {
             m_ControlMode = controlMode;
 
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                // Stop script and remove
-                if (m_ScriptHost != null && m_ScriptHost.IsRunning)
-                {
-                    m_ScriptHost.Stop();
-                    m_ScriptHost = null;
-                }
+            // Setup callback to interceptor
+            Interceptor.Callback = new InterceptionDelegate(m_MacroPlayer.OnReceiveData);
 
-                // Setup callback to interceptor
-                Interceptor.Callback = new InterceptionDelegate(m_MacroPlayer.OnReceiveData);
-
-                recordButton.Enabled = true;
-                recordToolStripMenuItem.Enabled = true;
-                loopCheckBox.Enabled = true;
-                loopCheckBox.Checked = m_MacroPlayer.Loop;
-                loopToolStripMenuItem.Enabled = true;
-                scriptButton.Enabled = false;
-                saveToolStripMenuItem.Enabled = true;
-                saveAsToolStripMenuItem.Enabled = true;
-                clearMacroToolStripMenuItem.Enabled = true;
-            }
-            else if (m_ControlMode == ControlMode.Script)
-            {
-                // Stop macro player
-                if (m_MacroPlayer.IsRecording) m_MacroPlayer.Record();
-                m_MacroPlayer.Stop();
-
-                // Setup callback to interceptor
-                Interceptor.Callback = new InterceptionDelegate(m_ScriptHost.OnReceiveData);
-
-                recordButton.Enabled = false;
-                recordToolStripMenuItem.Enabled = false;
-                loopCheckBox.Enabled = false;
-                loopCheckBox.Checked = false;
-                loopToolStripMenuItem.Enabled = false;
-                scriptButton.Enabled = true;
-                saveToolStripMenuItem.Enabled = false;
-                saveAsToolStripMenuItem.Enabled = false;
-                clearMacroToolStripMenuItem.Enabled = false;
-                currentTickToolStripStatusLabel.Text = CURRENT_TICK_DEFAULT_TEXT;
-            }
+            recordButton.Enabled = true;
+            recordToolStripMenuItem.Enabled = true;
+            loopToolStripMenuItem.Enabled = true;
+            saveToolStripMenuItem.Enabled = true;
+            saveAsToolStripMenuItem.Enabled = true;
+            clearMacroToolStripMenuItem.Enabled = true;
         }
 
         private void TemporarilySetControlMode(ControlMode controlMode, Action action)
@@ -177,18 +136,6 @@ namespace PlaystationMacro.Forms
             SetControlMode(ControlMode.Macro);
             m_MacroPlayer.LoadFile(path);
         }
-
-        public void LoadScript(string path)
-        {
-            var script = PlaystationMacroAPI.Internal.ScriptUtility.LoadScript(path);
-            m_SelectedScript = script;
-
-            m_ScriptHost = new ScriptHost(this, m_SelectedScript);
-            m_ScriptHost.PropertyChanged += ScriptHost_PropertyChanged;
-
-            SetControlMode(ControlMode.Script);
-        }
-
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -226,12 +173,14 @@ namespace PlaystationMacro.Forms
                 case "IsPlaying":
                     {
                         playButton.ForeColor = m_MacroPlayer.IsPlaying ? Color.Green : DefaultForeColor;
+                        UpdateCurrentTick();
                         break;
                     }
 
                 case "IsPaused":
                     {
                         playButton.ForeColor = m_MacroPlayer.IsPaused ? DefaultForeColor : playButton.ForeColor;
+                        UpdateCurrentTick();
                         break;
                     }
 
@@ -239,6 +188,7 @@ namespace PlaystationMacro.Forms
                     {
                         recordButton.ForeColor = m_MacroPlayer.IsRecording ? Color.Red : DefaultForeColor;
                         currentTickToolStripStatusLabel.ForeColor = m_MacroPlayer.IsRecording ? Color.Red : DefaultForeColor;
+                        UpdateCurrentTick();
                         break;
                     }
 
@@ -258,34 +208,6 @@ namespace PlaystationMacro.Forms
                     {
                         loopCheckBox.Checked = m_MacroPlayer.Loop;
                         loopToolStripMenuItem.Checked = m_MacroPlayer.Loop;
-                        break;
-                    }
-            }
-        }
-        #endregion
-
-        /* Script Host */
-        #region ScriptHost_PropertyChanged
-        private void ScriptHost_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "IsRunning":
-                    {
-                        playButton.ForeColor = m_ScriptHost.IsRunning ? Color.Green : DefaultForeColor;
-                        break;
-                    }
-
-                case "IsPaused":
-                    {
-                        if (m_ScriptHost.IsPaused && m_ScriptHost.IsRunning)
-                        {
-                            playButton.ForeColor = DefaultForeColor;
-                        }
-                        else if (!m_ScriptHost.IsPaused && m_ScriptHost.IsRunning)
-                        {
-                            playButton.ForeColor = Color.Green;
-                        }
                         break;
                     }
             }
@@ -316,62 +238,27 @@ namespace PlaystationMacro.Forms
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Play();
-            }
-            else if (m_ControlMode == ControlMode.Script)
-            {
-                m_ScriptHost.Play();
-            }
+            m_MacroPlayer.Play();
         }
 
         private void pauseButton_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Pause();
-            }
-            else if (m_ControlMode == ControlMode.Script)
-            {
-                m_ScriptHost.Pause();
-            }
+            m_MacroPlayer.Pause();
         }
 
         private void stopButton_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Stop();
-            }
-            else if (m_ControlMode == ControlMode.Script)
-            {
-                m_ScriptHost.Stop();
-            }
+            m_MacroPlayer.Stop();
         }
 
         private void recordButton_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Record();
-            }
+            m_MacroPlayer.Record();
         }
 
         private void loopCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Loop = loopCheckBox.Checked;
-            }
-        }
-        #endregion
-
-        /* Script buttons methods */
-        #region Script Buttons
-        private void scriptButton_Click(object sender, EventArgs e)
-        {
-            m_ScriptHost.ShowForm(this);
+            m_MacroPlayer.Loop = loopCheckBox.Checked;
         }
         #endregion
 
@@ -410,52 +297,34 @@ namespace PlaystationMacro.Forms
         #region Edit
         private void clearMacroToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Clear();
-            }
+            m_MacroPlayer.Clear();
         }
         #endregion
 
         #region Playback
         private void playToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Play();
-            }
+            m_MacroPlayer.Play();
         }
 
         private void pauseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Pause();
-            }
+            m_MacroPlayer.Pause();
         }
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Stop();
-            }
+            m_MacroPlayer.Stop();
         }
 
         private void recordToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Record();
-            }
+            m_MacroPlayer.Record();
         }
 
         private void loopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (m_ControlMode == ControlMode.Macro)
-            {
-                m_MacroPlayer.Loop = !loopToolStripMenuItem.Checked;
-            }
+            m_MacroPlayer.Loop = !loopToolStripMenuItem.Checked;
         }
         #endregion
 

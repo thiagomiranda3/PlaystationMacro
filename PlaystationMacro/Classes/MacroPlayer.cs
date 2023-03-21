@@ -31,8 +31,6 @@ using System.Text;
 
 namespace PlaystationMacro.Classes
 {
-    public delegate void MacroLapEnterHandler(object sender);
-
     public class MacroPlayer : INotifyPropertyChanged
     {
         #region INotifyPropertyChanged
@@ -123,7 +121,7 @@ namespace PlaystationMacro.Classes
                 if (value != m_CurrentTick)
                 {
                     m_CurrentTick = value;
-                    NotifyPropertyChanged("CurrentTick");
+                    //NotifyPropertyChanged("CurrentTick");
                 }
             }
         }
@@ -137,14 +135,10 @@ namespace PlaystationMacro.Classes
                 if (value != m_Sequence)
                 {
                     m_Sequence = value;
-                    NotifyPropertyChanged("Sequence");
+                    //NotifyPropertyChanged("Sequence");
                 }
             }
         }
-        #endregion
-
-        #region Events
-        public event MacroLapEnterHandler LapEnter;
         #endregion
 
         private bool m_RecordShortcutDown = false;
@@ -230,9 +224,6 @@ namespace PlaystationMacro.Classes
                 if (CurrentTick >= Sequence.Count)
                 {
                     CurrentTick = 0;
-
-                    // Raise LapEnter event
-                    LapEnter?.Invoke(this);
 
                     // Stop if looping is disabled
                     if (!Loop && !IsRecording)
