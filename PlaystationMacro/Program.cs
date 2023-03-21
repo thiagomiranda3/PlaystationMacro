@@ -66,13 +66,6 @@ namespace PlaystationMacro
                 Console.WriteLine("Try `PlaystationMacro --help` for usage.");
             }
 
-            // Display console for debugging if enabled
-            if (Settings.ShowConsole)
-            {
-                ConsoleHelper.AllocConsole();
-                ConsoleHelper.SetOut();
-            }
-
             // Add the event handler for handling UI thread exceptions to the event.
             Application.ThreadException += new ThreadExceptionEventHandler(OnThreadException);
 

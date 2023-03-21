@@ -74,26 +74,7 @@ namespace PS4RemotePlayInterceptor
             catch (Exception) { }
         }
 
-        /// <summary>
-        /// Report exception
-        /// </summary>
-        /// <param name="e"></param>
-        public void ReportException(Exception e)
-        {
-            try
-            {
-                Console.WriteLine("ReportException {0}", e.Message);
-            }
-            catch (Exception) { }
-        }
-
-
         /* Interface for hooks */
-
-        public void OnCreateFile(string filename, string mode)
-        {
-            //Console.WriteLine("OnCreateFile {0} | {1}", filename, mode);
-        }
 
         public void OnReadFile(string filename, ref byte[] state)
         {
@@ -111,15 +92,6 @@ namespace PS4RemotePlayInterceptor
                     // Expect it to be modified
                     Interceptor.Callback(ref state);
                 }
-            }
-            catch (Exception) { }
-        }
-
-        public void OnWriteFile(string filename, ref byte[] outputReport)
-        {
-            try
-            {
-                //Console.WriteLine("OnWriteFile {0}", filename);
             }
             catch (Exception) { }
         }

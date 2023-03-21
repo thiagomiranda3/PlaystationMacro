@@ -5,8 +5,6 @@ VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaystationMacro", "PlaystationMacro\PlaystationMacro.csproj", "{2AF33C2D-3BCD-467C-BC81-08025C164799}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaystationMacroAPI", "PlaystationMacroAPI\PlaystationMacroAPI.csproj", "{63B26590-8DD4-4534-8E5E-C72750F29934}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS4RemotePlayInterceptor", "PS4RemotePlayInterceptor\PS4RemotePlayInterceptor.csproj", "{7EA5CD79-4454-4BE5-BB06-FA4C8122808A}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{2AF33C2D-3BCD-467C-BC81-08025C164799}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AF33C2D-3BCD-467C-BC81-08025C164799}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AF33C2D-3BCD-467C-BC81-08025C164799}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63B26590-8DD4-4534-8E5E-C72750F29934}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63B26590-8DD4-4534-8E5E-C72750F29934}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63B26590-8DD4-4534-8E5E-C72750F29934}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63B26590-8DD4-4534-8E5E-C72750F29934}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7EA5CD79-4454-4BE5-BB06-FA4C8122808A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7EA5CD79-4454-4BE5-BB06-FA4C8122808A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EA5CD79-4454-4BE5-BB06-FA4C8122808A}.Release|Any CPU.ActiveCfg = Release|Any CPU

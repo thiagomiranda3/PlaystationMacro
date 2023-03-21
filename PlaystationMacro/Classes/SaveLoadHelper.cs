@@ -91,11 +91,6 @@ namespace PlaystationMacro.Classes
                 {
                     m_MainForm.LoadMacro(CurrentFile);
                 }
-                // Script
-                else if (CurrentFile.EndsWith("dll"))
-                {
-                    m_MainForm.LoadScript(CurrentFile);
-                }
                 // Invalid
                 else
                 {
