@@ -52,8 +52,8 @@ namespace PS4RemotePlayInterceptor
         #endregion
 
         // Constants
-        private const string TARGET_PROCESS_NAME = "RemotePlay";
         private const string INJECT_DLL_NAME = "PS4RemotePlayInterceptor.dll";
+        private const string INJECT_APP_NAME = @"C:\Program Files (x86)\Sony\PS Remote Play\RemotePlay.exe";
 
         // EasyHook
         private static string _channelName = null;
@@ -70,11 +70,6 @@ namespace PS4RemotePlayInterceptor
 
         public static int Inject()
         {
-            // Find the process
-            var process = FindRemotePlayProcess();
-            if (process == null)
-                throw new InterceptorException(string.Format("{0} not found in list of processes", TARGET_PROCESS_NAME));
-
             // Full path to our dll file
             string injectionLibrary = Path.Combine(Path.GetDirectoryName(typeof(InjectionInterface).Assembly.Location), INJECT_DLL_NAME);
 
@@ -101,20 +96,24 @@ namespace PS4RemotePlayInterceptor
                 }
 
                 // Inject dll into the process
+                int processId = -1;
                 if (shouldInject)
                 {
-                    RemoteHooking.Inject(
-                        process.Id, // ID of process to inject into
+                    RemoteHooking.CreateAndInject(
+                        INJECT_APP_NAME, // executable to run
+                        "", // command line arguments for target
+                        0, // additional process creation flags to pass to CreateProcess
                         (_noGAC ? InjectionOptions.DoNotRequireStrongName : InjectionOptions.Default),
                         // if not using GAC allow assembly without strong name
                         injectionLibrary, // 32-bit version (the same because AnyCPU)
                         injectionLibrary, // 64-bit version (the same because AnyCPU)
+                        out processId, // retrieve the newly created process ID
                         _channelName
                     );
                 }
 
                 // Success
-                return process.Id;
+                return processId;
             }
             catch (Exception ex)
             {
@@ -129,27 +128,6 @@ namespace PS4RemotePlayInterceptor
 
             _ipcServer.StopListening(null);
             _ipcServer = null;
-        }
-
-        public static Process FindRemotePlayProcess()
-        {
-            // Find by process name
-            var processes = Process.GetProcessesByName(TARGET_PROCESS_NAME);
-            foreach (var process in processes)
-            {
-                return process;
-            }
-
-            return null;
-        }
-
-        public static void SendStartSignal()
-        {
-            var process = FindRemotePlayProcess();
-            if (process == null)
-                return;
-
-            PostMessage(process.MainWindowHandle, 0x8001, 0x00000017, 0x00000008);
         }
     }
 }
