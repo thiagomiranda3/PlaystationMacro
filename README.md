@@ -28,46 +28,6 @@ See the [scripting video tutorial](https://youtu.be/daCb97rbimA) to get started 
 
 NOTE: The script have to include a reference to `PlaystationMacroAPI.dll` to interface with PlaystationMacro. At the moment the scripts has to be compiled into a DLL file to be able to open with PS4 Macro.
 
-##### Basic Example Script
-
-This example script will press DPad up and wait one second, follow by pressing square. The loop repeats every 800ms.
-
-```csharp
-using PlaystationMacroAPI;
-
-public class Script : ScriptBase
-{
-    /* Constructor */
-    public Script()
-    {
-        Config.Name = "Example Script";
-        Config.LoopDelay = 800;
-    }
-
-    // Called when the user pressed play
-    public override void Start()
-    {
-        base.Start();
-    }
-
-    // Called every interval set by LoopDelay
-    public override void Update()
-    {
-        Press(new DualShockState() { DPad_Up = true });
-        Sleep(1000);
-        Press(new DualShockState() { Square = true });
-    }
-}
-```
-
-#### List of Scripts
-
-- [Keyboard Remapping Utility](https://github.com/komefai/PlaystationMacro.Remote)
-- [Marvel Heroes Omega Bot](https://github.com/komefai/PlaystationMacro.MarvelHeroesOmega)
-- [PES2018 Bot (Simulator Mode)](https://github.com/leguims/PlaystationMacro.PES2018Lite) by [leguims](https://github.com/leguims)
-
----
-
 ## Credits
 
 - [EasyHook](https://easyhook.github.io/)
