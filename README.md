@@ -20,14 +20,6 @@ Automation utility for PS4 and PS5 Remote Play written in C#.
 
 To record, click on `RECORD` button (Ctrl+R) to arm recording then press `PLAY` to start recording controls. The red text on the bottom right indicates the number of frames recorded. You can stop recording by clicking on `RECORD` button (Ctrl+R) again. The macro will then play the controls in a loop.
 
-## Scripting
-
-C# scripting support has been introduced in version 0.3.0 and later. This allows us to create custom behaviors beyond repeating macros with an easy-to-use API. The API also includes wrapped convenience functions such as pressing buttons, timing, and taking a screenshot from PS4 Remote Play. 
-
-See the [scripting video tutorial](https://youtu.be/daCb97rbimA) to get started or see [the wiki](https://github.com/komefai/PlaystationMacro/wiki) for full documentation, examples, and other information.
-
-NOTE: The script have to include a reference to `PlaystationMacroAPI.dll` to interface with PlaystationMacro. At the moment the scripts has to be compiled into a DLL file to be able to open with PS4 Macro.
-
 ## Credits
 
 - [EasyHook](https://easyhook.github.io/)
